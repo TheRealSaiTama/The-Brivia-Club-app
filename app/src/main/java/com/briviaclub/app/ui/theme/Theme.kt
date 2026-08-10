@@ -1,56 +1,65 @@
 package com.briviaclub.app.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Typography
-import androidx.compose.material.darkColors
+import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-private val BriviaDarkColors = darkColors(
+private val BriviaLightColors = lightColors(
     primary = DeepWine,
     primaryVariant = MutedBurgundy,
     secondary = ChampagneGold,
-    background = RichBlack,
-    surface = CharcoalWineBlack,
-    onPrimary = WarmIvory,
-    onSecondary = RichBlack,
-    onBackground = WarmIvory,
-    onSurface = WarmIvory,
+    background = LightBackground,
+    surface = LightSurface,
+    onPrimary = LightSurface,
+    onSecondary = BlackText,
+    onBackground = BlackText,
+    onSurface = BlackText,
 )
 
 private val BriviaTypography = Typography(
     h1 = TextStyle(
-        fontFamily = FontFamily.Serif,
+        fontFamily = FontFamily.SansSerif,
+        fontWeight = FontWeight.Bold,
         fontSize = 32.sp,
-        color = WarmIvory
+        color = BlackText
     ),
     h2 = TextStyle(
-        fontFamily = FontFamily.Serif,
-        fontSize = 28.sp,
-        color = WarmIvory
+        fontFamily = FontFamily.SansSerif,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 26.sp,
+        color = BlackText
     ),
     body1 = TextStyle(
         fontFamily = FontFamily.SansSerif,
+        fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
-        color = SoftTaupeGrey
+        color = BlackText
     ),
     body2 = TextStyle(
         fontFamily = FontFamily.SansSerif,
+        fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
-        color = SoftTaupeGrey
+        color = BlackText
+    ),
+    caption = TextStyle(
+        fontFamily = FontFamily.SansSerif,
+        fontWeight = FontWeight.Normal,
+        fontSize = 12.sp,
+        color = SoftGrey
     )
 )
 
 @Composable
 fun BriviaClubAppTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
     MaterialTheme(
-        colors = BriviaDarkColors,
+        colors = BriviaLightColors,
         typography = BriviaTypography,
         shapes = MaterialTheme.shapes,
         content = content

@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">The Brivia Club</string>
+    <string name="start_building">Start building</string>
+    <string name="browse_club">Browse the club</string>
+    <string name="discover_title">Discover your next build partner</string>
+    <string name="discover_subtitle">Swipe premium decks now — AI-curated, verified, and ready to meet.</string>
+    <string name="view_matches">View matches</string>
+</resources>

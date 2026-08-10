@@ -23,28 +23,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.briviaclub.app.ui.theme.ChampagneGold
-import com.briviaclub.app.ui.theme.CharcoalWineBlack
+import com.briviaclub.app.ui.components.ThreeDCard
+import com.briviaclub.app.ui.theme.BriviaClubAppTheme
 import com.briviaclub.app.ui.theme.DeepWine
-import com.briviaclub.app.ui.theme.MutedBurgundy
-import com.briviaclub.app.ui.theme.RichBlack
+import com.briviaclub.app.ui.theme.SoftGrey
 import com.briviaclub.app.ui.theme.WarmIvory
-import com.briviaclub.app.ui.theme.WineGoldEnd
-import com.briviaclub.app.ui.theme.WineGoldStart
 
 @Composable
 fun HomeScreen(onNavigateDiscover: () -> Unit) {
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = RichBlack
+        color = MaterialTheme.colors.background
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(RichBlack, CharcoalWineBlack)
+                        colors = listOf(MaterialTheme.colors.background, MaterialTheme.colors.surface)
                     )
                 )
                 .padding(24.dp),
@@ -54,14 +52,16 @@ fun HomeScreen(onNavigateDiscover: () -> Unit) {
                 Text(
                     text = "The Brivia Club",
                     style = MaterialTheme.typography.h1,
-                    color = WarmIvory
+                    color = MaterialTheme.colors.onBackground
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Swipe. Match. Build.",
                     style = MaterialTheme.typography.h2,
-                    color = ChampagneGold
+                    color = DeepWine
                 )
+                Spacer(modifier = Modifier.height(20.dp))
+                ThreeDCard()
                 Spacer(modifier = Modifier.height(24.dp))
                 StatCard(
                     title = "12,400+ builders",
@@ -98,10 +98,18 @@ fun HomeScreen(onNavigateDiscover: () -> Unit) {
                     elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(text = "Browse the club", color = SoftTaupeGrey)
+                    Text(text = "Browse the club", color = MaterialTheme.colors.onBackground)
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFF7F2ED)
+@Composable
+fun HomeScreenPreview() {
+    BriviaClubAppTheme {
+        HomeScreen(onNavigateDiscover = {})
     }
 }
 
@@ -109,14 +117,14 @@ fun HomeScreen(onNavigateDiscover: () -> Unit) {
 private fun StatCard(title: String, subtitle: String) {
     Card(
         shape = RoundedCornerShape(20.dp),
-        backgroundColor = CharcoalWineBlack,
+        backgroundColor = MaterialTheme.colors.surface,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.h2,
-                color = ChampagneGold,
+                color = DeepWine,
                 textAlign = TextAlign.Start,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -124,7 +132,7 @@ private fun StatCard(title: String, subtitle: String) {
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.body1,
-                color = SoftTaupeGrey
+                color = MaterialTheme.colors.onSurface
             )
         }
     }

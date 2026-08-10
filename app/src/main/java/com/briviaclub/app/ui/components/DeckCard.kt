@@ -18,10 +18,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.briviaclub.app.ui.theme.ChampagneGold
-import com.briviaclub.app.ui.theme.CharcoalWineBlack
+import com.briviaclub.app.ui.theme.LightSurface
 import com.briviaclub.app.ui.theme.MutedBurgundy
-import com.briviaclub.app.ui.theme.RichBlack
-import com.briviaclub.app.ui.theme.SoftTaupeGrey
+import com.briviaclub.app.ui.theme.SoftGrey
 import com.briviaclub.app.ui.theme.WarmIvory
 
 @Composable
@@ -37,14 +36,14 @@ fun DeckCard(
             .fillMaxWidth()
             .padding(vertical = 12.dp),
         shape = RoundedCornerShape(28.dp),
-        backgroundColor = CharcoalWineBlack,
+        backgroundColor = LightSurface,
         elevation = 8.dp
     ) {
         Box(
             modifier = Modifier
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(CharcoalWineBlack, RichBlack)
+                        colors = listOf(LightSurface, LightBackground)
                     )
                 )
                 .padding(24.dp)
@@ -57,17 +56,17 @@ fun DeckCard(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.h6,
-                    color = WarmIvory,
+                    color = MaterialTheme.colors.onBackground,
                     fontWeight = FontWeight.ExtraBold
                 )
                 Text(
                     text = role,
                     style = MaterialTheme.typography.body1,
-                    color = SoftTaupeGrey
+                    color = MaterialTheme.colors.onSurface
                 )
                 Text(
                     text = tags.joinToString(" • "),
-                    style = MaterialTheme.typography.body2,
+                    style = MaterialTheme.typography.caption,
                     color = ChampagneGold
                 )
                 Text(

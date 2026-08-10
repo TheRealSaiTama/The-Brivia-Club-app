@@ -1,0 +1,11 @@
+<resources>
+    <color name="colorPrimary">#6E1423</color>
+    <color name="colorPrimaryVariant">#8E354A</color>
+    <color name="colorSecondary">#C9A24B</color>
+    <color name="colorBackground">#0A0908</color>
+    <color name="colorSurface">#14100F</color>
+    <color name="colorOnPrimary">#F5EFE6</color>
+    <color name="colorOnSecondary">#0A0908</color>
+    <color name="colorOnBackground">#F5EFE6</color>
+    <color name="colorOnSurface">#F5EFE6</color>
+</resources>

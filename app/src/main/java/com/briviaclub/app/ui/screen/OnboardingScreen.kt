@@ -22,25 +22,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.briviaclub.app.ui.theme.ChampagneGold
-import com.briviaclub.app.ui.theme.CharcoalWineBlack
 import com.briviaclub.app.ui.theme.DeepWine
-import com.briviaclub.app.ui.theme.RichBlack
-import com.briviaclub.app.ui.theme.SoftTaupeGrey
-import com.briviaclub.app.ui.theme.WarmIvory
 
 @Composable
 fun OnboardingScreen(onContinue: () -> Unit) {
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = RichBlack
+        color = MaterialTheme.colors.background
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(RichBlack, CharcoalWineBlack)
+                        colors = listOf(MaterialTheme.colors.background, MaterialTheme.colors.surface)
                     )
                 )
                 .padding(24.dp),
@@ -50,13 +45,13 @@ fun OnboardingScreen(onContinue: () -> Unit) {
                 Text(
                     text = "Welcome to The Brivia Club",
                     style = MaterialTheme.typography.h1,
-                    color = WarmIvory
+                    color = MaterialTheme.colors.onBackground
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = "A members-only club for builders who want to swipe less and ship more.",
                     style = MaterialTheme.typography.body1,
-                    color = SoftTaupeGrey
+                    color = MaterialTheme.colors.onSurface
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 StatCard(
@@ -82,20 +77,20 @@ fun OnboardingScreen(onContinue: () -> Unit) {
 private fun StatCard(title: String, subtitle: String) {
     Card(
         shape = RoundedCornerShape(20.dp),
-        backgroundColor = CharcoalWineBlack,
+        backgroundColor = MaterialTheme.colors.surface,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.h2,
-                color = ChampagneGold
+                color = DeepWine
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.body1,
-                color = SoftTaupeGrey
+                color = MaterialTheme.colors.onSurface
             )
         }
     }

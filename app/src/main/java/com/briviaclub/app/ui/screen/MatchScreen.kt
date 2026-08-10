@@ -29,14 +29,14 @@ import com.briviaclub.app.ui.theme.WarmIvory
 fun MatchScreen() {
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = RichBlack
+        color = MaterialTheme.colors.background
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(RichBlack, CharcoalWineBlack)
+                        colors = listOf(MaterialTheme.colors.background, MaterialTheme.colors.surface)
                     )
                 )
                 .padding(24.dp),
@@ -45,31 +45,31 @@ fun MatchScreen() {
             Text(
                 text = "Your Matches",
                 style = MaterialTheme.typography.h1,
-                color = WarmIvory
+                color = MaterialTheme.colors.onBackground
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = "Where teams form and the next build begins.",
                 style = MaterialTheme.typography.body1,
-                color = SoftTaupeGrey
+                color = MaterialTheme.colors.onSurface
             )
             Spacer(modifier = Modifier.height(24.dp))
             Card(
                 shape = RoundedCornerShape(24.dp),
-                backgroundColor = CharcoalWineBlack,
+                backgroundColor = MaterialTheme.colors.surface,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Text(
                         text = "You've got a new match!",
                         style = MaterialTheme.typography.h2,
-                        color = ChampagneGold
+                        color = DeepWine
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Open the team room, start the conversation, and set the first sprint goal.",
                         style = MaterialTheme.typography.body1,
-                        color = SoftTaupeGrey
+                        color = MaterialTheme.colors.onSurface
                     )
                 }
             }
