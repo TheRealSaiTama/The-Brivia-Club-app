@@ -21,8 +21,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.briviaclub.app.ui.theme.BriviaClubAppTheme
 import com.briviaclub.app.ui.theme.DeepWine
+import com.briviaclub.app.ui.theme.WarmIvory
 
 @Composable
 fun OnboardingScreen(onContinue: () -> Unit) {
@@ -70,6 +73,14 @@ fun OnboardingScreen(onContinue: () -> Unit) {
                 Text(text = "Start building", color = WarmIvory)
             }
         }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFF7F2ED)
+@Composable
+fun OnboardingScreenPreview() {
+    BriviaClubAppTheme {
+        OnboardingScreen(onContinue = {})
     }
 }
 

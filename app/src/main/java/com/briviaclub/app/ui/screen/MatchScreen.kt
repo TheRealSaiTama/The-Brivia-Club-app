@@ -3,6 +3,7 @@ package com.briviaclub.app.ui.screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,7 +19,10 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.briviaclub.app.ui.theme.BriviaClubAppTheme
 import com.briviaclub.app.ui.theme.ChampagneGold
 import com.briviaclub.app.ui.theme.CharcoalWineBlack
 import com.briviaclub.app.ui.theme.RichBlack
@@ -71,8 +75,39 @@ fun MatchScreen() {
                         style = MaterialTheme.typography.body1,
                         color = MaterialTheme.colors.onSurface
                     )
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Button(
+                            onClick = {},
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(24.dp),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = DeepWine)
+                        ) {
+                            Text(text = "Message", color = WarmIvory)
+                        }
+                        Button(
+                            onClick = {},
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(24.dp),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
+                            elevation = ButtonDefaults.elevation(defaultElevation = 0.dp)
+                        ) {
+                            Text(text = "View profile", color = MaterialTheme.colors.onBackground)
+                        }
+                    }
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFF7F2ED)
+@Composable
+fun MatchScreenPreview() {
+    BriviaClubAppTheme {
+        MatchScreen()
     }
 }
