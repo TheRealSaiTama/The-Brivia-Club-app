@@ -1,295 +1,295 @@
 package com.briviaclub.app.ui.screen
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Card
-import androidx.compose.material.MaterialTheme
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
+import androidx.compose.material.Icon
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.briviaclub.app.R
-import com.briviaclub.app.ui.components.ProfilePreviewCard
-import com.briviaclub.app.ui.components.ThreeDCard
 import com.briviaclub.app.ui.theme.BriviaClubAppTheme
 import com.briviaclub.app.ui.theme.CardBorder
-import com.briviaclub.app.ui.theme.CardSurface
 import com.briviaclub.app.ui.theme.CommunityBadge
-import com.briviaclub.app.ui.theme.DeepWine
 import com.briviaclub.app.ui.theme.PrimaryBackground
 import com.briviaclub.app.ui.theme.PrimaryText
 import com.briviaclub.app.ui.theme.SecondaryText
-import com.briviaclub.app.ui.theme.SoftGrey
-import com.briviaclub.app.ui.theme.WarmIvory
 
-
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun HomeScreen(
-    onNavigateDiscover: () -> Unit,
-    onNavigateCreateProfile: () -> Unit
-) {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = PrimaryBackground
-    ) {
+fun HomeScreen(onNavigateDiscover: () -> Unit) {
+    var fullName by remember { mutableStateOf("") }
+    var roleTitle by remember { mutableStateOf("") }
+    var location by remember { mutableStateOf("") }
+
+    val selectedSkills = remember { mutableStateListOf<String>() }
+    val availableSkills = listOf("AI Products", "Launch Strategy", "Fundraising", "Fullstack", "UI/UX Design", "Growth")
+
+    val selectedLookingFor = remember { mutableStateListOf<String>() }
+    val lookingForOptions = listOf("Co-founder", "Teammates", "Mentorship", "Investors", "Networking")
+
+    Surface(modifier = Modifier.fillMaxSize(), color = PrimaryBackground) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(MaterialTheme.colors.background, MaterialTheme.colors.surface)
-                    )
-                )
                 .verticalScroll(rememberScrollState())
-                .padding(24.dp),
-            verticalArrangement = Arrangement.SpaceBetween
+                .padding(horizontal = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            Column {
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            Brush.horizontalGradient(
-                                colors = listOf(Color(0xFFFFF9F6), Color.Transparent)
-                            ),
-                            shape = RoundedCornerShape(38.dp)
-                        )
-                        .padding(24.dp)
+                        .background(CommunityBadge.copy(alpha = 0.08f), CircleShape)
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .background(
-                                color = CommunityBadge,
-                                shape = RoundedCornerShape(50.dp)
-                            )
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Text(
-                            text = "COMMUNITY",
-                            style = MaterialTheme.typography.caption,
-                            color = Color.White
-                        )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .size(100.dp)
-                            .align(Alignment.TopEnd)
-                            .offset(x = 16.dp, y = (-22).dp)
-                            .background(
-                                Brush.radialGradient(
-                                    colors = listOf(DeepWine.copy(alpha = 0.18f), Color.Transparent),
-                                    center = Offset.Unspecified,
-                                    radius = 140f
-                                ),
-                                shape = CircleShape
-                            )
+                    Text(
+                        text = "COMMUNITY",
+                        color = CommunityBadge,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
                     )
-                    Box(
-                        modifier = Modifier
-                            .size(50.dp)
-                            .align(Alignment.TopEnd)
-                            .offset(x = 24.dp, y = (-8).dp)
-                            .background(
-                                Brush.radialGradient(
-                                    colors = listOf(DeepWine.copy(alpha = 0.28f), Color.Transparent),
-                                    center = Offset.Unspecified,
-                                    radius = 80f
-                                ),
-                                shape = CircleShape
-                            )
-                    )
-                    Column {
-                        Text(
-                            text = "Welcome to",
-                            style = MaterialTheme.typography.body1,
-                            color = SecondaryText
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = "The Brivia Club",
-                            style = MaterialTheme.typography.h1.copy(letterSpacing = 0.8.sp),
-                            color = PrimaryText
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Text(
-                            text = "A premium swipe experience for founders, creators and teams.",
-                            style = MaterialTheme.typography.body1,
-                            color = SecondaryText
-                        )
-                        Spacer(modifier = Modifier.height(18.dp))
-                        ProfilePreviewCard(
-                            name = "Priya Sharma",
-                            role = "Startup founder • Bengaluru",
-                            expertise = "Launch strategy • AI products",
-                            status = "Featured"
-                        )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .padding(top = 4.dp)
-                            .shadow(4.dp, RoundedCornerShape(20.dp), clip = false)
-                            .background(
-                                Brush.horizontalGradient(
-                                    colors = listOf(DeepWine.copy(alpha = 0.18f), Color.Transparent)
-                                ),
-                                shape = RoundedCornerShape(20.dp)
-                            )
-                            .padding(horizontal = 14.dp, vertical = 8.dp)
-                    ) {
-                        Text(
-                            text = "Premium club access",
-                            style = MaterialTheme.typography.caption,
-                            color = DeepWine
-                        )
-                    }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    text = "The Brivia Club",
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = PrimaryText
+                )
+
+                Text(
+                    text = "Set up your profile to start connecting with verified founders and builders.",
+                    fontSize = 15.sp,
+                    color = SecondaryText,
+                    lineHeight = 22.sp
+                )
+            }
+
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .shadow(24.dp, RoundedCornerShape(32.dp), clip = false)
-                        .background(
-                            Brush.radialGradient(
-                                colors = listOf(Color(0xFFFFF6F2), Color.Transparent),
-                                center = Offset.Unspecified,
-                                radius = 420f
-                            ),
-                            shape = RoundedCornerShape(32.dp)
+                        .size(100.dp)
+                        .clip(CircleShape)
+                        .background(CommunityBadge.copy(alpha = 0.1f))
+                        .border(2.dp, CommunityBadge, CircleShape)
+                        .clickable { },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Profile Photo",
+                        tint = CommunityBadge,
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .background(CommunityBadge),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add",
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
                         )
-                        .padding(18.dp)
-                ) {
-                    ThreeDCard()
+                    }
                 }
-                Spacer(modifier = Modifier.height(24.dp))
-                StatCard(
-                    title = "12,400+ builders",
-                    subtitle = "Verified builders in the club"
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = fullName,
+                    onValueChange = { fullName = it },
+                    label = { Text("Full Name") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        backgroundColor = Color.White,
+                        focusedBorderColor = CommunityBadge,
+                        unfocusedBorderColor = CardBorder,
+                        focusedLabelColor = CommunityBadge,
+                        cursorColor = CommunityBadge
+                    )
                 )
-                Spacer(modifier = Modifier.height(16.dp))
-                StatCard(
-                    title = "640+ teams shipped",
-                    subtitle = "Matched builders who launched together"
+
+                OutlinedTextField(
+                    value = roleTitle,
+                    onValueChange = { roleTitle = it },
+                    label = { Text("Role / Startup (e.g. Founder & Engineer)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        backgroundColor = Color.White,
+                        focusedBorderColor = CommunityBadge,
+                        unfocusedBorderColor = CardBorder,
+                        focusedLabelColor = CommunityBadge,
+                        cursorColor = CommunityBadge
+                    )
                 )
-                Spacer(modifier = Modifier.height(16.dp))
-                StatCard(
-                    title = "92% match satisfaction",
-                    subtitle = "High signal matches, not noise"
+
+                OutlinedTextField(
+                    value = location,
+                    onValueChange = { location = it },
+                    label = { Text("Location (e.g. Bengaluru, IN)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        backgroundColor = Color.White,
+                        focusedBorderColor = CommunityBadge,
+                        unfocusedBorderColor = CardBorder,
+                        focusedLabelColor = CommunityBadge,
+                        cursorColor = CommunityBadge
+                    )
                 )
             }
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "Your Expertise",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = PrimaryText
+                )
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    availableSkills.forEach { skill ->
+                        SelectablePill(
+                            text = skill,
+                            selected = selectedSkills.contains(skill),
+                            onClick = {
+                                if (selectedSkills.contains(skill)) {
+                                    selectedSkills.remove(skill)
+                                } else {
+                                    selectedSkills.add(skill)
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "Interested in / Looking For",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = PrimaryText
+                )
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    lookingForOptions.forEach { option ->
+                        SelectablePill(
+                            text = option,
+                            selected = selectedLookingFor.contains(option),
+                            onClick = {
+                                if (selectedLookingFor.contains(option)) {
+                                    selectedLookingFor.remove(option)
+                                } else {
+                                    selectedLookingFor.add(option)
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+
+            Button(
+                onClick = onNavigateDiscover,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp),
+                shape = CircleShape,
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = CommunityBadge,
+                    contentColor = Color.White
+                )
             ) {
-                Button(
-                    onClick = onNavigateDiscover,
-                    shape = RoundedCornerShape(28.dp),
-                    colors = ButtonDefaults.buttonColors(backgroundColor = DeepWine, contentColor = WarmIvory),
-                    elevation = ButtonDefaults.elevation(defaultElevation = 8.dp, pressedElevation = 4.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                ) {
-                    Text(text = "Start building")
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-                Button(
-                    onClick = onNavigateCreateProfile,
-                    shape = RoundedCornerShape(28.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = CommunityBadge.copy(alpha = 0.12f),
-                        contentColor = CommunityBadge
-                    ),
-                    elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(text = "Create Your Profile", fontWeight = FontWeight.SemiBold)
-                }
+                Text(
+                    text = "Complete Profile & Start Swiping",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFFF7F2ED)
+@Composable
+private fun SelectablePill(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .clip(CircleShape)
+            .background(if (selected) CommunityBadge else Color.White)
+            .border(1.dp, if (selected) CommunityBadge else CardBorder, CircleShape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 8.dp)
+    ) {
+        Text(
+            text = text,
+            fontSize = 13.sp,
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+            color = if (selected) Color.White else PrimaryText
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFFAF7F2)
 @Composable
 fun HomeScreenPreview() {
     BriviaClubAppTheme {
-        HomeScreen(onNavigateDiscover = {}, onNavigateCreateProfile = {})
-    }
-}
-
-@Composable
-private fun StatCard(title: String, subtitle: String) {
-    Card(
-        shape = RoundedCornerShape(20.dp),
-        backgroundColor = CardSurface,
-        border = BorderStroke(1.dp, CardBorder),
-        elevation = 6.dp,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier.padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.h2,
-                    fontWeight = FontWeight.Bold,
-                    color = DeepWine
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.body1,
-                    color = SecondaryText
-                )
-            }
-            Image(
-                painter = painterResource(id = R.drawable.ic_avatar_group),
-                contentDescription = null,
-                modifier = Modifier.size(52.dp)
-            )
-        }
+        HomeScreen(onNavigateDiscover = {})
     }
 }
