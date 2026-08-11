@@ -83,7 +83,7 @@ fun HomeScreen(onNavigateDiscover: () -> Unit) {
                         .padding(horizontal = 14.dp, vertical = 6.dp)
                 ) {
                     Text(
-                        text = "EXCLUSIVE COMMUNITY",
+                        text = "MEMBER ACCESS",
                         color = CommunityBadge,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
@@ -92,7 +92,7 @@ fun HomeScreen(onNavigateDiscover: () -> Unit) {
                 }
 
                 Text(
-                    text = "Welcome to\nThe Brivia Club",
+                    text = "Your build journey\nstarts here",
                     fontSize = 36.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = PrimaryText,
@@ -100,7 +100,7 @@ fun HomeScreen(onNavigateDiscover: () -> Unit) {
                 )
 
                 Text(
-                    text = "A members-only club for builders who want to swipe less and ship more.",
+                    text = "Create your profile to get curated matches with verified founders, teams, and advisors.",
                     fontSize = 15.sp,
                     color = SecondaryText,
                     lineHeight = 22.sp
