@@ -13,12 +13,12 @@ private val BriviaLightColors = lightColors(
     primary = DeepWine,
     primaryVariant = MutedBurgundy,
     secondary = ChampagneGold,
-    background = LightBackground,
-    surface = LightSurface,
+    background = PrimaryBackground,
+    surface = CardSurface,
     onPrimary = LightSurface,
     onSecondary = BlackText,
-    onBackground = BlackText,
-    onSurface = BlackText,
+    onBackground = PrimaryText,
+    onSurface = SecondaryText,
 )
 
 private val BriviaTypography = Typography(

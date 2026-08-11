@@ -1,8 +1,0 @@
-<resources>
-    <style name="Theme.BriviaClubApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="android:windowBackground">@android:color/black</item>
-        <item name="android:windowSplashScreenBackground">@android:color/black</item>
-        <item name="android:statusBarColor">#0A0908</item>
-        <item name="android:navigationBarColor">#14100F</item>
-    </style>
-</resources>

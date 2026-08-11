@@ -19,10 +19,12 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.briviaclub.app.ui.theme.BriviaClubAppTheme
+import com.briviaclub.app.ui.theme.DeepWine
 import com.briviaclub.app.ui.theme.ChampagneGold
 import com.briviaclub.app.ui.theme.CharcoalWineBlack
 import com.briviaclub.app.ui.theme.RichBlack
@@ -84,9 +86,9 @@ fun MatchScreen() {
                             onClick = {},
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(24.dp),
-                            colors = ButtonDefaults.buttonColors(backgroundColor = DeepWine)
+                            colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.surface, contentColor = DeepWine)
                         ) {
-                            Text(text = "Message", color = WarmIvory)
+                            Text(text = "Message")
                         }
                         Button(
                             onClick = {},
