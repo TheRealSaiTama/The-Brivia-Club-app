@@ -49,9 +49,10 @@ fun ThreeDCard(modifier: Modifier = Modifier) {
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDrag = { change, dragAmount ->
-                        change.consume()
-                        targetX.value = (targetX.value + dragAmount.y / 12f).coerceIn(-18f, 18f)
-                        targetY.value = (targetY.value - dragAmount.x / 12f).coerceIn(-18f, 18f)
+                        if (kotlin.math.abs(dragAmount.x) > kotlin.math.abs(dragAmount.y)) {
+                            change.consume()
+                            targetY.value = (targetY.value - dragAmount.x / 12f).coerceIn(-18f, 18f)
+                        }
                     },
                     onDragEnd = {
                         targetX.value = 10f

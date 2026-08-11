@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
@@ -59,7 +61,10 @@ import com.briviaclub.app.ui.theme.WarmIvory
 
 
 @Composable
-fun HomeScreen(onNavigateDiscover: () -> Unit) {
+fun HomeScreen(
+    onNavigateDiscover: () -> Unit,
+    onNavigateCreateProfile: () -> Unit
+) {
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = PrimaryBackground
@@ -72,6 +77,7 @@ fun HomeScreen(onNavigateDiscover: () -> Unit) {
                         colors = listOf(MaterialTheme.colors.background, MaterialTheme.colors.surface)
                     )
                 )
+                .verticalScroll(rememberScrollState())
                 .padding(24.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
@@ -227,13 +233,16 @@ fun HomeScreen(onNavigateDiscover: () -> Unit) {
                 }
                 Spacer(modifier = Modifier.height(12.dp))
                 Button(
-                    onClick = {},
+                    onClick = onNavigateCreateProfile,
                     shape = RoundedCornerShape(28.dp),
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent, contentColor = MaterialTheme.colors.onBackground),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = CommunityBadge.copy(alpha = 0.12f),
+                        contentColor = CommunityBadge
+                    ),
                     elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(text = "Browse the club")
+                    Text(text = "Create Your Profile", fontWeight = FontWeight.SemiBold)
                 }
             }
         }
@@ -244,7 +253,7 @@ fun HomeScreen(onNavigateDiscover: () -> Unit) {
 @Composable
 fun HomeScreenPreview() {
     BriviaClubAppTheme {
-        HomeScreen(onNavigateDiscover = {})
+        HomeScreen(onNavigateDiscover = {}, onNavigateCreateProfile = {})
     }
 }
 
