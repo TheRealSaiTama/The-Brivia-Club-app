@@ -2,7 +2,6 @@ package com.briviaclub.app.ui.screen
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -96,70 +94,29 @@ fun HomeScreen(onNavigateCreateProfile: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(18.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            val avatarColors = listOf(
-                                Color(0xFF6B1D2F),
-                                Color(0xFFD4A373),
-                                Color(0xFF2A9D8F),
-                                Color(0xFFE76F51)
-                            )
-                            avatarColors.forEachIndexed { index, color ->
-                                Box(
-                                    modifier = Modifier
-                                        .offset(x = (-10 * index).dp)
-                                        .size(38.dp)
-                                        .clip(CircleShape)
-                                        .background(color)
-                                        .border(2.dp, Color.White, CircleShape),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text("\u26A1", fontSize = 14.sp)
-                                }
-                            }
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .background(Color(0xFFE8F5E9))
-                                .padding(horizontal = 10.dp, vertical = 4.dp)
-                        ) {
-                            Text(
-                                text = "\u25CF Active Now",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = Color(0xFF2E7D32)
-                            )
-                        }
-                    }
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "12,400+ ",
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = CommunityBadge
-                        )
-                        Text(
-                            text = "builders",
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = PrimaryText
-                        )
-                    }
-
                     Text(
-                        text = "Verified members shaping products, startups, and engineering teams worldwide.",
-                        fontSize = 14.sp,
-                        color = SecondaryText,
-                        lineHeight = 20.sp
+                        text = "How it works",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = PrimaryText
+                    )
+
+                    StepItem(
+                        number = "1",
+                        title = "Create your profile",
+                        subtitle = "Share what you build and what you're looking for."
+                    )
+                    StepItem(
+                        number = "2",
+                        title = "Discover matches",
+                        subtitle = "Swipe through verified, AI-curated builder decks."
+                    )
+                    StepItem(
+                        number = "3",
+                        title = "Connect & build",
+                        subtitle = "Start conversations and ship together."
                     )
                 }
             }
@@ -194,6 +151,44 @@ fun HomeScreen(onNavigateCreateProfile: () -> Unit) {
                     textAlign = TextAlign.Center
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun StepItem(number: String, title: String, subtitle: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(CircleShape)
+                .background(CommunityBadge.copy(alpha = 0.1f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = number,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = CommunityBadge
+            )
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                text = title,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = PrimaryText
+            )
+            Text(
+                text = subtitle,
+                fontSize = 13.sp,
+                color = SecondaryText,
+                lineHeight = 18.sp
+            )
         }
     }
 }
