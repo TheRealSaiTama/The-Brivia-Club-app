@@ -1,5 +1,6 @@
 package com.briviaclub.app.ui.screen
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -8,26 +9,35 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -39,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -49,37 +60,30 @@ import com.briviaclub.app.ui.theme.PrimaryBackground
 import com.briviaclub.app.ui.theme.PrimaryText
 import com.briviaclub.app.ui.theme.SecondaryText
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(onNavigateDiscover: () -> Unit) {
-    var fullName by remember { mutableStateOf("") }
-    var roleTitle by remember { mutableStateOf("") }
-    var location by remember { mutableStateOf("") }
+    var showProfileSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    val selectedSkills = remember { mutableStateListOf<String>() }
-    val availableSkills = listOf("AI Products", "Launch Strategy", "Fundraising", "Fullstack", "UI/UX Design", "Growth")
-
-    val selectedLookingFor = remember { mutableStateListOf<String>() }
-    val lookingForOptions = listOf("Co-founder", "Teammates", "Mentorship", "Investors", "Networking")
-
-    Surface(modifier = Modifier.fillMaxSize(), color = PrimaryBackground) {
+    Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+                .background(PrimaryBackground)
+                .systemBarsPadding()
+                .padding(horizontal = 24.dp, vertical = 20.dp),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Box(
                     modifier = Modifier
-                        .background(CommunityBadge.copy(alpha = 0.08f), CircleShape)
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .clip(CircleShape)
+                        .background(CommunityBadge.copy(alpha = 0.08f))
+                        .padding(horizontal = 14.dp, vertical = 6.dp)
                 ) {
                     Text(
-                        text = "COMMUNITY",
+                        text = "EXCLUSIVE COMMUNITY",
                         color = CommunityBadge,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
@@ -88,201 +92,292 @@ fun HomeScreen(onNavigateDiscover: () -> Unit) {
                 }
 
                 Text(
-                    text = "The Brivia Club",
-                    fontSize = 32.sp,
+                    text = "Welcome to\nThe Brivia Club",
+                    fontSize = 36.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = PrimaryText
+                    color = PrimaryText,
+                    lineHeight = 42.sp
                 )
 
                 Text(
-                    text = "Set up your profile to start connecting with verified founders and builders.",
+                    text = "A members-only club for builders who want to swipe less and ship more.",
                     fontSize = 15.sp,
                     color = SecondaryText,
                     lineHeight = 22.sp
                 )
             }
 
-            Box(
+            Card(
                 modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                border = BorderStroke(1.dp, CardBorder)
             ) {
-                Box(
+                Column(
                     modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape)
-                        .background(CommunityBadge.copy(alpha = 0.1f))
-                        .border(2.dp, CommunityBadge, CircleShape)
-                        .clickable { },
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .padding(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = "Profile Photo",
-                        tint = CommunityBadge,
-                        modifier = Modifier.size(48.dp)
-                    )
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .size(28.dp)
-                            .clip(CircleShape)
-                            .background(CommunityBadge),
-                        contentAlignment = Alignment.Center
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Add",
-                            tint = Color.White,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                }
-            }
-
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(
-                    value = fullName,
-                    onValueChange = { fullName = it },
-                    label = { Text("Full Name") },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        backgroundColor = Color.White,
-                        focusedBorderColor = CommunityBadge,
-                        unfocusedBorderColor = CardBorder,
-                        focusedLabelColor = CommunityBadge,
-                        cursorColor = CommunityBadge
-                    )
-                )
-
-                OutlinedTextField(
-                    value = roleTitle,
-                    onValueChange = { roleTitle = it },
-                    label = { Text("Role / Startup (e.g. Founder & Engineer)") },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        backgroundColor = Color.White,
-                        focusedBorderColor = CommunityBadge,
-                        unfocusedBorderColor = CardBorder,
-                        focusedLabelColor = CommunityBadge,
-                        cursorColor = CommunityBadge
-                    )
-                )
-
-                OutlinedTextField(
-                    value = location,
-                    onValueChange = { location = it },
-                    label = { Text("Location (e.g. Bengaluru, IN)") },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        backgroundColor = Color.White,
-                        focusedBorderColor = CommunityBadge,
-                        unfocusedBorderColor = CardBorder,
-                        focusedLabelColor = CommunityBadge,
-                        cursorColor = CommunityBadge
-                    )
-                )
-            }
-
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = "Your Expertise",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = PrimaryText
-                )
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    availableSkills.forEach { skill ->
-                        SelectablePill(
-                            text = skill,
-                            selected = selectedSkills.contains(skill),
-                            onClick = {
-                                if (selectedSkills.contains(skill)) {
-                                    selectedSkills.remove(skill)
-                                } else {
-                                    selectedSkills.add(skill)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            val avatarColors = listOf(
+                                Color(0xFF6B1D2F),
+                                Color(0xFFD4A373),
+                                Color(0xFF2A9D8F),
+                                Color(0xFFE76F51)
+                            )
+                            avatarColors.forEachIndexed { index, color ->
+                                Box(
+                                    modifier = Modifier
+                                        .offset(x = (-10 * index).dp)
+                                        .size(38.dp)
+                                        .clip(CircleShape)
+                                        .background(color)
+                                        .border(2.dp, Color.White, CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text("\u26A1", fontSize = 14.sp)
                                 }
                             }
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(Color(0xFFE8F5E9))
+                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = "\u25CF Active Now",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFF2E7D32)
+                            )
+                        }
+                    }
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "12,400+ ",
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = CommunityBadge
+                        )
+                        Text(
+                            text = "builders",
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = PrimaryText
                         )
                     }
+
+                    Text(
+                        text = "Verified members shaping products, startups, and engineering teams worldwide.",
+                        fontSize = 14.sp,
+                        color = SecondaryText,
+                        lineHeight = 20.sp
+                    )
                 }
             }
 
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = "Interested in / Looking For",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = PrimaryText
-                )
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    lookingForOptions.forEach { option ->
-                        SelectablePill(
-                            text = option,
-                            selected = selectedLookingFor.contains(option),
-                            onClick = {
-                                if (selectedLookingFor.contains(option)) {
-                                    selectedLookingFor.remove(option)
-                                } else {
-                                    selectedLookingFor.add(option)
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-
-            Button(
-                onClick = onNavigateDiscover,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(54.dp),
-                shape = CircleShape,
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = CommunityBadge,
-                    contentColor = Color.White
-                )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                Button(
+                    onClick = { showProfileSheet = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = CircleShape,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = CommunityBadge,
+                        contentColor = Color.White
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
+                ) {
+                    Text(
+                        text = "Create your profile",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
                 Text(
-                    text = "Complete Profile & Start Swiping",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
+                    text = "Membership subject to community approval",
+                    fontSize = 12.sp,
+                    color = SecondaryText.copy(alpha = 0.8f),
+                    textAlign = TextAlign.Center
                 )
             }
+        }
 
-            Spacer(modifier = Modifier.height(24.dp))
+        if (showProfileSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showProfileSheet = false },
+                sheetState = sheetState,
+                containerColor = PrimaryBackground,
+                shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+            ) {
+                ProfileFormContent(
+                    onSubmit = {
+                        showProfileSheet = false
+                        onNavigateDiscover()
+                    }
+                )
+            }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-private fun SelectablePill(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    Box(
+fun ProfileFormContent(onSubmit: () -> Unit) {
+    var name by remember { mutableStateOf("") }
+    var role by remember { mutableStateOf("") }
+    val selectedSkills = remember { mutableStateListOf<String>() }
+    val availableSkills = listOf("AI / ML", "SaaS", "Fullstack", "Design", "Growth", "Web3")
+
+    Column(
         modifier = Modifier
-            .clip(CircleShape)
-            .background(if (selected) CommunityBadge else Color.White)
-            .border(1.dp, if (selected) CommunityBadge else CardBorder, CircleShape)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 8.dp)
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
+            .padding(bottom = 32.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         Text(
-            text = text,
-            fontSize = 13.sp,
-            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-            color = if (selected) Color.White else PrimaryText
+            text = "Create Profile",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            color = PrimaryText
         )
+
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(88.dp)
+                    .clip(CircleShape)
+                    .background(CommunityBadge.copy(alpha = 0.1f))
+                    .border(2.dp, CommunityBadge, CircleShape)
+                    .clickable { },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "Upload Photo",
+                    tint = CommunityBadge,
+                    modifier = Modifier.size(40.dp)
+                )
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .size(26.dp)
+                        .clip(CircleShape)
+                        .background(CommunityBadge),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add",
+                        tint = Color.White,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Full Name") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = CommunityBadge,
+                    unfocusedBorderColor = CardBorder,
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White,
+                    focusedLabelColor = CommunityBadge,
+                    cursorColor = CommunityBadge
+                )
+            )
+
+            OutlinedTextField(
+                value = role,
+                onValueChange = { role = it },
+                label = { Text("Role or Focus Area") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = CommunityBadge,
+                    unfocusedBorderColor = CardBorder,
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White,
+                    focusedLabelColor = CommunityBadge,
+                    cursorColor = CommunityBadge
+                )
+            )
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                text = "Interests / Skills",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = PrimaryText
+            )
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                availableSkills.forEach { skill ->
+                    val isSelected = selectedSkills.contains(skill)
+                    FilterChip(
+                        selected = isSelected,
+                        onClick = {
+                            if (isSelected) selectedSkills.remove(skill) else selectedSkills.add(skill)
+                        },
+                        label = { Text(skill) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = CommunityBadge,
+                            selectedLabelColor = Color.White,
+                            containerColor = Color.White,
+                            labelColor = PrimaryText
+                        ),
+                        shape = CircleShape
+                    )
+                }
+            }
+        }
+
+        Button(
+            onClick = onSubmit,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp),
+            shape = CircleShape,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = CommunityBadge,
+                contentColor = Color.White
+            )
+        ) {
+            Text(
+                text = "Save & Continue",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
 
