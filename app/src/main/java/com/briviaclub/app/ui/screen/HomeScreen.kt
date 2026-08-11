@@ -3,12 +3,9 @@ package com.briviaclub.app.ui.screen
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,32 +15,14 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,18 +39,17 @@ import com.briviaclub.app.ui.theme.PrimaryBackground
 import com.briviaclub.app.ui.theme.PrimaryText
 import com.briviaclub.app.ui.theme.SecondaryText
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onNavigateDiscover: () -> Unit) {
-    var showProfileSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-    Box(modifier = Modifier.fillMaxSize()) {
+fun HomeScreen(onNavigateCreateProfile: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(PrimaryBackground)
+            .systemBarsPadding()
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(PrimaryBackground)
-                .systemBarsPadding()
                 .padding(horizontal = 24.dp, vertical = 20.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
@@ -191,7 +169,7 @@ fun HomeScreen(onNavigateDiscover: () -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Button(
-                    onClick = { showProfileSheet = true },
+                    onClick = onNavigateCreateProfile,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
@@ -217,167 +195,6 @@ fun HomeScreen(onNavigateDiscover: () -> Unit) {
                 )
             }
         }
-
-        if (showProfileSheet) {
-            ModalBottomSheet(
-                onDismissRequest = { showProfileSheet = false },
-                sheetState = sheetState,
-                containerColor = PrimaryBackground,
-                shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
-            ) {
-                ProfileFormContent(
-                    onSubmit = {
-                        showProfileSheet = false
-                        onNavigateDiscover()
-                    }
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
-@Composable
-fun ProfileFormContent(onSubmit: () -> Unit) {
-    var name by remember { mutableStateOf("") }
-    var role by remember { mutableStateOf("") }
-    val selectedSkills = remember { mutableStateListOf<String>() }
-    val availableSkills = listOf("AI / ML", "SaaS", "Fullstack", "Design", "Growth", "Web3")
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp)
-            .padding(bottom = 32.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
-    ) {
-        Text(
-            text = "Create Profile",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = PrimaryText
-        )
-
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(88.dp)
-                    .clip(CircleShape)
-                    .background(CommunityBadge.copy(alpha = 0.1f))
-                    .border(2.dp, CommunityBadge, CircleShape)
-                    .clickable { },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Upload Photo",
-                    tint = CommunityBadge,
-                    modifier = Modifier.size(40.dp)
-                )
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .size(26.dp)
-                        .clip(CircleShape)
-                        .background(CommunityBadge),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add",
-                        tint = Color.White,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            }
-        }
-
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Full Name") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = CommunityBadge,
-                    unfocusedBorderColor = CardBorder,
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    focusedLabelColor = CommunityBadge,
-                    cursorColor = CommunityBadge
-                )
-            )
-
-            OutlinedTextField(
-                value = role,
-                onValueChange = { role = it },
-                label = { Text("Role or Focus Area") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = CommunityBadge,
-                    unfocusedBorderColor = CardBorder,
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    focusedLabelColor = CommunityBadge,
-                    cursorColor = CommunityBadge
-                )
-            )
-        }
-
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(
-                text = "Interests / Skills",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = PrimaryText
-            )
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                availableSkills.forEach { skill ->
-                    val isSelected = selectedSkills.contains(skill)
-                    FilterChip(
-                        selected = isSelected,
-                        onClick = {
-                            if (isSelected) selectedSkills.remove(skill) else selectedSkills.add(skill)
-                        },
-                        label = { Text(skill) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = CommunityBadge,
-                            selectedLabelColor = Color.White,
-                            containerColor = Color.White,
-                            labelColor = PrimaryText
-                        ),
-                        shape = CircleShape
-                    )
-                }
-            }
-        }
-
-        Button(
-            onClick = onSubmit,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-            shape = CircleShape,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = CommunityBadge,
-                contentColor = Color.White
-            )
-        ) {
-            Text(
-                text = "Save & Continue",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
     }
 }
 
@@ -385,6 +202,6 @@ fun ProfileFormContent(onSubmit: () -> Unit) {
 @Composable
 fun HomeScreenPreview() {
     BriviaClubAppTheme {
-        HomeScreen(onNavigateDiscover = {})
+        HomeScreen(onNavigateCreateProfile = {})
     }
 }
