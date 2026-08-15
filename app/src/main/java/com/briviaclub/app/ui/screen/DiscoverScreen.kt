@@ -1,4 +1,4 @@
-package com.briviaclub.app.ui.screen
+﻿package com.briviaclub.app.ui.screen
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -48,6 +49,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -88,6 +90,8 @@ private data class PartnerProfile(
     val age: String,
     val role: String,
     val location: String,
+    val city: String,
+    val category: String,
     val tagline: String,
     val matchPercent: String,
     val verified: String,
@@ -101,65 +105,75 @@ private val sampleDeck = listOf(
         initial = "A",
         name = "Ananya Rao",
         age = "24",
-        role = "Product Designer • NID",
-        location = "Bengaluru • 5 km away",
-        tagline = "Hackathon mentor • AI UX • Fintech",
+        role = "Product Designer â€¢ NID",
+        location = "Bengaluru â€¢ 5 km away",
+        city = "Bengaluru",
+        category = "Co-founders",
+        tagline = "Hackathon mentor â€¢ AI UX â€¢ Fintech",
         matchPercent = "94%",
         verified = "Verified Builder",
         bio = "Building AI-driven design systems. Looking for a fullstack co-founder to ship a scalable MVP for B2B SaaS applications.",
-        interests = listOf("🎨 Figma", "⚡ React", "🤖 LLMs", "📍 Bengaluru", "💼 Co-founder", "🏆 Hackathons"),
+        interests = listOf("ðŸŽ¨ Figma", "âš¡ React", "ðŸ¤– LLMs", "ðŸ“ Bengaluru", "ðŸ’¼ Co-founder", "ðŸ† Hackathons"),
         photoUrl = "https://randomuser.me/api/portraits/women/44.jpg"
     ),
     PartnerProfile(
         initial = "D",
         name = "Dev Patel",
         age = "26",
-        role = "Full-stack engineer • IIT Bombay",
-        location = "Pune • 8 km away",
-        tagline = "Node.js • Startup ops • Growth",
+        role = "Full-stack engineer â€¢ IIT Bombay",
+        location = "Pune â€¢ 8 km away",
+        city = "Pune",
+        category = "Co-founders",
+        tagline = "Node.js â€¢ Startup ops â€¢ Growth",
         matchPercent = "92%",
         verified = "Verified Builder",
         bio = "Shipped 3 MVPs in 18 months. Looking to pair with a sharp product/design mind for the next AI-native tool.",
-        interests = listOf("⚛️ React", "🟢 Node", "☁️ AWS", "📍 Pune", "💼 Co-founder", "🚀 Startups"),
+        interests = listOf("âš›ï¸ React", "ðŸŸ¢ Node", "â˜ï¸ AWS", "ðŸ“ Pune", "ðŸ’¼ Co-founder", "ðŸš€ Startups"),
         photoUrl = "https://randomuser.me/api/portraits/men/32.jpg"
     ),
     PartnerProfile(
         initial = "R",
         name = "Rhea Sen",
         age = "29",
-        role = "Product Lead • Mumbai",
-        location = "Mumbai • 12 km away",
-        tagline = "Design systems • Brand building • Growth",
+        role = "Product Lead â€¢ Mumbai",
+        location = "Mumbai â€¢ 12 km away",
+        city = "Mumbai",
+        category = "Startups",
+        tagline = "Design systems â€¢ Brand building â€¢ Growth",
         matchPercent = "91%",
         verified = "Verified Builder",
         bio = "Ex-fintech PM leading product discovery. Seeking a technical co-founder for a vertical SaaS experiment.",
-        interests = listOf("📊 Metrics", "🧠 Strategy", "💼 SaaS", "📍 Mumbai", "💼 Co-founder", "🏆 Hackathons"),
+        interests = listOf("ðŸ“Š Metrics", "ðŸ§  Strategy", "ðŸ’¼ SaaS", "ðŸ“ Mumbai", "ðŸ’¼ Co-founder", "ðŸ† Hackathons"),
         photoUrl = "https://randomuser.me/api/portraits/women/68.jpg"
     ),
     PartnerProfile(
         initial = "K",
         name = "Kabir Mehta",
         age = "34",
-        role = "Startup advisor • Bengaluru",
-        location = "Bengaluru • 2 km away",
-        tagline = "Scale-ups • Investor relations • Strategy",
+        role = "Startup advisor â€¢ Bengaluru",
+        location = "Bengaluru â€¢ 2 km away",
+        city = "Bengaluru",
+        category = "Gigs",
+        tagline = "Scale-ups â€¢ Investor relations â€¢ Strategy",
         matchPercent = "89%",
         verified = "Verified Builder",
         bio = "Two exits under my belt. Mentoring first-time founders; open to advisory or a founding CTO role.",
-        interests = listOf("🚀 Scale", "💡 Mentorship", "🤝 Networks", "📍 Bengaluru", "💼 Advisor", "🏆 Exits"),
+        interests = listOf("ðŸš€ Scale", "ðŸ’¡ Mentorship", "ðŸ¤ Networks", "ðŸ“ Bengaluru", "ðŸ’¼ Advisor", "ðŸ† Exits"),
         photoUrl = "https://randomuser.me/api/portraits/men/75.jpg"
     ),
     PartnerProfile(
         initial = "N",
         name = "Naina Kapoor",
         age = "27",
-        role = "Community lead • Pune",
-        location = "Pune • 15 km away",
-        tagline = "Network building • User research • Ops",
+        role = "Community lead â€¢ Pune",
+        location = "Pune â€¢ 15 km away",
+        city = "Pune",
+        category = "Hackathons",
+        tagline = "Network building â€¢ User research â€¢ Ops",
         matchPercent = "90%",
         verified = "Verified Builder",
         bio = "Building developer communities. Looking for co-hosts and builder partners for regional hackathons.",
-        interests = listOf("🎪 Events", "🧑‍🤝‍🧑 Community", "📣 DevRel", "📍 Pune", "🏆 Hackathons", "💼 Networking"),
+        interests = listOf("ðŸŽª Events", "ðŸ§‘â€ðŸ¤â€ðŸ§‘ Community", "ðŸ“£ DevRel", "ðŸ“ Pune", "ðŸ† Hackathons", "ðŸ’¼ Networking"),
         photoUrl = "https://randomuser.me/api/portraits/women/65.jpg"
     )
 )
@@ -167,14 +181,24 @@ private val sampleDeck = listOf(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun DiscoverScreen(onNavigateChat: (name: String, initial: String, role: String) -> Unit) {
-    var selectedCategory by remember { mutableStateOf("Co-founders") }
+    var selectedCategory by remember { mutableStateOf("All") }
+    var filterLocation by remember { mutableStateOf("All locations") }
+    var showFilterSheet by remember { mutableStateOf(false) }
     var sheetProfile by remember { mutableStateOf<PartnerProfile?>(null) }
     var matchProfile by remember { mutableStateOf<PartnerProfile?>(null) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val categories = listOf("Hackathons", "Co-founders", "Startups", "Gigs")
+    val filterSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val categories = listOf("All", "Hackathons", "Co-founders", "Startups", "Gigs")
+    val locations = listOf("All locations", "Bengaluru", "Pune", "Mumbai")
 
     val deckIndex = remember { mutableStateOf(0) }
-    val profile = sampleDeck[deckIndex.value % sampleDeck.size]
+    val filteredDeck = remember(filterLocation, selectedCategory) {
+        sampleDeck.filter { profile ->
+            (filterLocation == "All locations" || profile.city == filterLocation) &&
+                (selectedCategory == "All" || profile.category == selectedCategory)
+        }
+    }
+    val profile = if (filteredDeck.isEmpty()) null else filteredDeck[deckIndex.value % filteredDeck.size]
     val chipListState = rememberScrollState()
     val autoScrollEnabled = remember { mutableStateOf(true) }
 
@@ -207,19 +231,58 @@ fun DiscoverScreen(onNavigateChat: (name: String, initial: String, role: String)
         ) {
             Spacer(modifier = Modifier.height(4.dp))
 
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(
-                    text = "Discover your next\nbuild partner",
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = PrimaryText,
-                    lineHeight = 34.sp
-                )
-                Text(
-                    text = "AI-curated, verified, and ready to meet.",
-                    fontSize = 13.sp,
-                    color = SecondaryText
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = "Discover your next\nbuild partner",
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = PrimaryText,
+                        lineHeight = 34.sp
+                    )
+                    Text(
+                        text = "AI-curated, verified, and ready to meet.",
+                        fontSize = 13.sp,
+                        color = SecondaryText
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Surface(
+                    onClick = { showFilterSheet = true },
+                    shape = CircleShape,
+                    color = Color.White,
+                    border = BorderStroke(1.dp, CardBorderColor)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = "Filters",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = PrimaryText
+                        )
+                        if (filterLocation != "All locations" || selectedCategory != "All") {
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .clip(CircleShape)
+                                    .background(CommunityBadge)
+                            )
+                        }
+                    }
+                }
             }
 
             Row(
@@ -240,7 +303,10 @@ fun DiscoverScreen(onNavigateChat: (name: String, initial: String, role: String)
                     val isSelected = category == selectedCategory
                     FilterChip(
                         selected = isSelected,
-                        onClick = { selectedCategory = category },
+                        onClick = {
+                            selectedCategory = category
+                            deckIndex.value = 0
+                        },
                         label = { Text(category, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = CommunityBadge,
@@ -253,11 +319,37 @@ fun DiscoverScreen(onNavigateChat: (name: String, initial: String, role: String)
                 }
             }
 
-            FullPhotoCard(
-                profile = profile,
-                onViewDetails = { sheetProfile = profile },
-                modifier = Modifier.weight(1f)
-            )
+            if (profile != null) {
+                FullPhotoCard(
+                    profile = profile,
+                    onViewDetails = { sheetProfile = profile },
+                    modifier = Modifier.weight(1f)
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = "No matches yet",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = PrimaryText
+                        )
+                        Text(
+                            text = "Try changing your location or category filters.",
+                            fontSize = 13.sp,
+                            color = SecondaryText
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(70.dp))
         }
@@ -275,7 +367,7 @@ fun DiscoverScreen(onNavigateChat: (name: String, initial: String, role: String)
         ) {
             IconButton(
                 onClick = {
-                    deckIndex.value = (deckIndex.value + 1) % sampleDeck.size
+                    deckIndex.value = (deckIndex.value + 1) % maxOf(filteredDeck.size, 1)
                 },
                 modifier = Modifier
                     .size(48.dp)
@@ -286,7 +378,11 @@ fun DiscoverScreen(onNavigateChat: (name: String, initial: String, role: String)
             }
 
             IconButton(
-                onClick = { matchProfile = profile },
+                onClick = {
+                    profile?.let { matchedProfile ->
+                        matchProfile = matchedProfile
+                    }
+                },
                 modifier = Modifier
                     .size(52.dp)
                     .clip(CircleShape)
@@ -310,12 +406,120 @@ fun DiscoverScreen(onNavigateChat: (name: String, initial: String, role: String)
             }
         }
 
+        if (showFilterSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showFilterSheet = false },
+                sheetState = filterSheetState,
+                containerColor = Color.White,
+                shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
+                        .padding(bottom = 32.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Filters",
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = PrimaryText
+                        )
+
+                        TextButton(
+                            onClick = {
+                                filterLocation = "All locations"
+                                selectedCategory = "All"
+                                deckIndex.value = 0
+                            },
+                            enabled = filterLocation != "All locations" || selectedCategory != "All"
+                        ) {
+                            Text("Clear all", color = CommunityBadge, fontWeight = FontWeight.Bold)
+                        }
+                    }
+
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("Location", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = PrimaryText)
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            locations.forEach { location ->
+                                val isSelected = location == filterLocation
+                                FilterChip(
+                                    selected = isSelected,
+                                    onClick = {
+                                        filterLocation = location
+                                        deckIndex.value = 0
+                                    },
+                                    label = { Text(location, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = CommunityBadge,
+                                        selectedLabelColor = Color.White,
+                                        containerColor = PrimaryBackground,
+                                        labelColor = PrimaryText
+                                    ),
+                                    shape = CircleShape
+                                )
+                            }
+                        }
+                    }
+
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("Category", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = PrimaryText)
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            categories.forEach { category ->
+                                val isSelected = category == selectedCategory
+                                FilterChip(
+                                    selected = isSelected,
+                                    onClick = {
+                                        selectedCategory = category
+                                        deckIndex.value = 0
+                                    },
+                                    label = { Text(category, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = CommunityBadge,
+                                        selectedLabelColor = Color.White,
+                                        containerColor = PrimaryBackground,
+                                        labelColor = PrimaryText
+                                    ),
+                                    shape = CircleShape
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Button(
+                        onClick = { showFilterSheet = false },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp),
+                        shape = CircleShape,
+                        colors = ButtonDefaults.buttonColors(containerColor = CommunityBadge)
+                    ) {
+                        Text("Apply filters", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        }
+
         matchProfile?.let { matched ->
             val firstName = matched.name.split(" ").first()
             Dialog(
                 onDismissRequest = {
                     matchProfile = null
-                    deckIndex.value = (deckIndex.value + 1) % sampleDeck.size
+                    deckIndex.value = (deckIndex.value + 1) % maxOf(filteredDeck.size, 1)
                 },
                 properties = DialogProperties(usePlatformDefaultWidth = false)
             ) {
@@ -328,7 +532,7 @@ fun DiscoverScreen(onNavigateChat: (name: String, initial: String, role: String)
                             indication = null
                         ) {
                             matchProfile = null
-                            deckIndex.value = (deckIndex.value + 1) % sampleDeck.size
+                            deckIndex.value = (deckIndex.value + 1) % maxOf(filteredDeck.size, 1)
                         },
                     contentAlignment = Alignment.Center
                 ) {
@@ -506,7 +710,7 @@ private fun FullPhotoCard(
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
                         Text(
-                            text = "★ Top Pick",
+                            text = "â˜… Top Pick",
                             color = Color.White,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
