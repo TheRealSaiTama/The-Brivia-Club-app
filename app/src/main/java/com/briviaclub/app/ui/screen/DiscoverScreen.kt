@@ -1,5 +1,7 @@
 package com.briviaclub.app.ui.screen
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -16,9 +18,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -57,6 +58,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -157,13 +159,22 @@ fun DiscoverScreen(onNavigateMatches: () -> Unit) {
 
     val deckIndex = remember { mutableStateOf(0) }
     val profile = sampleDeck[deckIndex.value % sampleDeck.size]
-    val chipListState = rememberLazyListState()
+    val chipListState = rememberScrollState()
+    val autoScrollEnabled = remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
-        delay(400)
-        chipListState.animateScrollToItem(index = categories.size - 1)
-        delay(700)
-        chipListState.animateScrollToItem(index = 0)
+        while (autoScrollEnabled.value) {
+            delay(600)
+            chipListState.animateScrollTo(
+                value = chipListState.maxValue,
+                animationSpec = tween(durationMillis = 1600, easing = LinearEasing)
+            )
+            delay(900)
+            chipListState.animateScrollTo(
+                value = 0,
+                animationSpec = tween(durationMillis = 1600, easing = LinearEasing)
+            )
+        }
     }
 
     Box(
@@ -195,12 +206,21 @@ fun DiscoverScreen(onNavigateMatches: () -> Unit) {
                 )
             }
 
-            LazyRow(
-                state = chipListState,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(chipListState)
+                    .pointerInput(Unit) {
+                        awaitPointerEventScope {
+                            while (true) {
+                                awaitFirstDown()
+                                autoScrollEnabled.value = false
+                            }
+                        }
+                    },
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(categories) { category ->
+                categories.forEach { category ->
                     val isSelected = category == selectedCategory
                     FilterChip(
                         selected = isSelected,
