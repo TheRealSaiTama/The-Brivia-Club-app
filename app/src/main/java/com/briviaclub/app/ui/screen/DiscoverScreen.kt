@@ -61,7 +61,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -74,6 +76,7 @@ import com.briviaclub.app.ui.theme.CommunityBadge
 import com.briviaclub.app.ui.theme.PrimaryBackground
 import com.briviaclub.app.ui.theme.PrimaryText
 import com.briviaclub.app.ui.theme.SecondaryText
+import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
 
 private val TagBgLight = Color(0xFFF3ECEE)
@@ -89,7 +92,8 @@ private data class PartnerProfile(
     val matchPercent: String,
     val verified: String,
     val bio: String,
-    val interests: List<String>
+    val interests: List<String>,
+    val photoUrl: String
 )
 
 private val sampleDeck = listOf(
@@ -103,7 +107,8 @@ private val sampleDeck = listOf(
         matchPercent = "94%",
         verified = "Verified Builder",
         bio = "Building AI-driven design systems. Looking for a fullstack co-founder to ship a scalable MVP for B2B SaaS applications.",
-        interests = listOf("🎨 Figma", "⚡ React", "🤖 LLMs", "📍 Bengaluru", "💼 Co-founder", "🏆 Hackathons")
+        interests = listOf("🎨 Figma", "⚡ React", "🤖 LLMs", "📍 Bengaluru", "💼 Co-founder", "🏆 Hackathons"),
+        photoUrl = "https://randomuser.me/api/portraits/women/44.jpg"
     ),
     PartnerProfile(
         initial = "D",
@@ -115,7 +120,8 @@ private val sampleDeck = listOf(
         matchPercent = "92%",
         verified = "Verified Builder",
         bio = "Shipped 3 MVPs in 18 months. Looking to pair with a sharp product/design mind for the next AI-native tool.",
-        interests = listOf("⚛️ React", "🟢 Node", "☁️ AWS", "📍 Pune", "💼 Co-founder", "🚀 Startups")
+        interests = listOf("⚛️ React", "🟢 Node", "☁️ AWS", "📍 Pune", "💼 Co-founder", "🚀 Startups"),
+        photoUrl = "https://randomuser.me/api/portraits/men/32.jpg"
     ),
     PartnerProfile(
         initial = "R",
@@ -127,7 +133,8 @@ private val sampleDeck = listOf(
         matchPercent = "91%",
         verified = "Verified Builder",
         bio = "Ex-fintech PM leading product discovery. Seeking a technical co-founder for a vertical SaaS experiment.",
-        interests = listOf("📊 Metrics", "🧠 Strategy", "💼 SaaS", "📍 Mumbai", "💼 Co-founder", "🏆 Hackathons")
+        interests = listOf("📊 Metrics", "🧠 Strategy", "💼 SaaS", "📍 Mumbai", "💼 Co-founder", "🏆 Hackathons"),
+        photoUrl = "https://randomuser.me/api/portraits/women/68.jpg"
     ),
     PartnerProfile(
         initial = "K",
@@ -139,7 +146,8 @@ private val sampleDeck = listOf(
         matchPercent = "89%",
         verified = "Verified Builder",
         bio = "Two exits under my belt. Mentoring first-time founders; open to advisory or a founding CTO role.",
-        interests = listOf("🚀 Scale", "💡 Mentorship", "🤝 Networks", "📍 Bengaluru", "💼 Advisor", "🏆 Exits")
+        interests = listOf("🚀 Scale", "💡 Mentorship", "🤝 Networks", "📍 Bengaluru", "💼 Advisor", "🏆 Exits"),
+        photoUrl = "https://randomuser.me/api/portraits/men/75.jpg"
     ),
     PartnerProfile(
         initial = "N",
@@ -151,13 +159,14 @@ private val sampleDeck = listOf(
         matchPercent = "90%",
         verified = "Verified Builder",
         bio = "Building developer communities. Looking for co-hosts and builder partners for regional hackathons.",
-        interests = listOf("🎪 Events", "🧑‍🤝‍🧑 Community", "📣 DevRel", "📍 Pune", "🏆 Hackathons", "💼 Networking")
+        interests = listOf("🎪 Events", "🧑‍🤝‍🧑 Community", "📣 DevRel", "📍 Pune", "🏆 Hackathons", "💼 Networking"),
+        photoUrl = "https://randomuser.me/api/portraits/women/65.jpg"
     )
 )
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun DiscoverScreen(onNavigateMatches: () -> Unit) {
+fun DiscoverScreen(onNavigateChat: (name: String, initial: String, role: String) -> Unit) {
     var selectedCategory by remember { mutableStateOf("Co-founders") }
     var sheetProfile by remember { mutableStateOf<PartnerProfile?>(null) }
     var matchProfile by remember { mutableStateOf<PartnerProfile?>(null) }
@@ -370,7 +379,7 @@ fun DiscoverScreen(onNavigateMatches: () -> Unit) {
                             Spacer(modifier = Modifier.height(4.dp))
 
                             Button(
-                                onClick = onNavigateMatches,
+                                onClick = { onNavigateChat(matched.name, matched.initial, matched.role) },
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = CommunityBadge,
@@ -459,6 +468,15 @@ private fun FullPhotoCard(
                         fontWeight = FontWeight.Black
                     )
                 }
+
+                AsyncImage(
+                    model = profile.photoUrl,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    placeholder = ColorPainter(Color.Transparent),
+                    error = ColorPainter(Color.Transparent),
+                    modifier = Modifier.fillMaxSize()
+                )
 
                 Box(
                     modifier = Modifier
@@ -717,17 +735,6 @@ private fun FullProfileDetailsContent(
                 }
             }
         }
-
-        Button(
-            onClick = onClose,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(54.dp),
-            shape = CircleShape,
-            colors = ButtonDefaults.buttonColors(containerColor = CommunityBadge)
-        ) {
-            Text("Connect with ${profile.name.substringBefore(" ")}", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        }
     }
 }
 
@@ -735,6 +742,6 @@ private fun FullProfileDetailsContent(
 @Composable
 fun DiscoverScreenPreview() {
     BriviaClubAppTheme {
-        DiscoverScreen(onNavigateMatches = {})
+        DiscoverScreen(onNavigateChat = { _, _, _ -> })
     }
 }

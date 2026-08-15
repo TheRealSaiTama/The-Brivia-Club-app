@@ -1,14 +1,17 @@
 package com.briviaclub.app.ui.navigation
 
+import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.briviaclub.app.ui.screen.ChatScreen
 import com.briviaclub.app.ui.screen.CreateProfileScreen
 import com.briviaclub.app.ui.screen.DiscoverScreen
 import com.briviaclub.app.ui.screen.HomeScreen
-import com.briviaclub.app.ui.screen.MatchScreen
 import com.briviaclub.app.ui.screen.OnboardingScreen
 
 sealed class Screen(val route: String) {
@@ -16,7 +19,10 @@ sealed class Screen(val route: String) {
     object Home : Screen("home")
     object CreateProfile : Screen("create_profile")
     object Discover : Screen("discover")
-    object Matches : Screen("matches")
+    object Chat : Screen("chat/{initial}/{name}/{role}") {
+        fun createRoute(initial: String, name: String, role: String): String =
+            "chat/${Uri.encode(initial)}/${Uri.encode(name)}/${Uri.encode(role)}"
+    }
 }
 
 @Composable
@@ -39,10 +45,26 @@ fun BriviaNavGraph(navController: NavHostController = rememberNavController()) {
             )
         }
         composable(Screen.Discover.route) {
-            DiscoverScreen(onNavigateMatches = { navController.navigate(Screen.Matches.route) })
+            DiscoverScreen(
+                onNavigateChat = { name, initial, role ->
+                    navController.navigate(Screen.Chat.createRoute(initial, name, role))
+                }
+            )
         }
-        composable(Screen.Matches.route) {
-            MatchScreen()
+        composable(
+            route = Screen.Chat.route,
+            arguments = listOf(
+                navArgument("initial") { type = NavType.StringType },
+                navArgument("name") { type = NavType.StringType },
+                navArgument("role") { type = NavType.StringType }
+            )
+        ) { entry ->
+            ChatScreen(
+                name = entry.arguments?.getString("name").orEmpty(),
+                initial = entry.arguments?.getString("initial").orEmpty(),
+                role = entry.arguments?.getString("role").orEmpty(),
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }
