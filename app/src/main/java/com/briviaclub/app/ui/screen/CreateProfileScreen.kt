@@ -1,5 +1,14 @@
 package com.briviaclub.app.ui.screen
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
+import android.net.Uri
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,6 +44,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -44,6 +54,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -53,6 +66,8 @@ import com.briviaclub.app.ui.theme.CommunityBadge
 import com.briviaclub.app.ui.theme.PrimaryBackground
 import com.briviaclub.app.ui.theme.PrimaryText
 import com.briviaclub.app.ui.theme.SecondaryText
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -64,6 +79,18 @@ fun CreateProfileScreen(
     var roleTitle by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
     var bio by remember { mutableStateOf("") }
+
+    val context = LocalContext.current
+    var photoUri by remember { mutableStateOf<Uri?>(null) }
+    var photoBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri -> photoUri = uri }
+    )
+    LaunchedEffect(photoUri) {
+        val uri = photoUri ?: return@LaunchedEffect
+        photoBitmap = withContext(Dispatchers.IO) { decodePhoto(uri, context.contentResolver) }
+    }
 
     val selectedSkills = remember { mutableStateListOf<String>() }
     val availableSkills = listOf("AI / ML", "SaaS", "Fullstack", "UI/UX", "Growth", "Marketing")
@@ -128,15 +155,28 @@ fun CreateProfileScreen(
                     .clip(CircleShape)
                     .background(CommunityBadge.copy(alpha = 0.08f))
                     .border(2.dp, CommunityBadge, CircleShape)
-                    .clickable { },
+                    .clickable {
+                        imagePicker.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
+                    },
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Upload Photo",
-                    tint = CommunityBadge,
-                    modifier = Modifier.size(40.dp)
-                )
+                if (photoBitmap != null) {
+                    Image(
+                        bitmap = photoBitmap!!.asImageBitmap(),
+                        contentDescription = "Profile Photo",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Upload Photo",
+                        tint = CommunityBadge,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
@@ -304,6 +344,21 @@ fun CreateProfileScreen(
         }
 
         Spacer(modifier = Modifier.height(24.dp))
+    }
+}
+
+private fun decodePhoto(uri: Uri, resolver: android.content.ContentResolver): Bitmap? {
+    return try {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            ImageDecoder.decodeBitmap(ImageDecoder.createSource(resolver, uri)) { decoder, _, _ ->
+                decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+                decoder.isMutableRequired = true
+            }
+        } else {
+            resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it) }
+        }
+    } catch (e: Exception) {
+        null
     }
 }
 
