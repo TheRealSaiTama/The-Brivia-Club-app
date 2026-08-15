@@ -1,7 +1,5 @@
 ﻿package com.briviaclub.app.ui.screen
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,8 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -64,7 +60,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -79,7 +74,6 @@ import com.briviaclub.app.ui.theme.PrimaryBackground
 import com.briviaclub.app.ui.theme.PrimaryText
 import com.briviaclub.app.ui.theme.SecondaryText
 import coil.compose.AsyncImage
-import kotlinx.coroutines.delay
 
 private val TagBgLight = Color(0xFFF3ECEE)
 private val CardBorderColor = Color(0xFFEFE6E8)
@@ -199,23 +193,6 @@ fun DiscoverScreen(onNavigateChat: (name: String, initial: String, role: String)
         }
     }
     val profile = if (filteredDeck.isEmpty()) null else filteredDeck[deckIndex.value % filteredDeck.size]
-    val chipListState = rememberScrollState()
-    val autoScrollEnabled = remember { mutableStateOf(true) }
-
-    LaunchedEffect(Unit) {
-        while (autoScrollEnabled.value) {
-            delay(600)
-            chipListState.animateScrollTo(
-                value = chipListState.maxValue,
-                animationSpec = tween(durationMillis = 1600, easing = LinearEasing)
-            )
-            delay(900)
-            chipListState.animateScrollTo(
-                value = 0,
-                animationSpec = tween(durationMillis = 1600, easing = LinearEasing)
-            )
-        }
-    }
 
     Box(
         modifier = Modifier
@@ -282,40 +259,6 @@ fun DiscoverScreen(onNavigateChat: (name: String, initial: String, role: String)
                             )
                         }
                     }
-                }
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(chipListState)
-                    .pointerInput(Unit) {
-                        awaitPointerEventScope {
-                            while (true) {
-                                awaitFirstDown()
-                                autoScrollEnabled.value = false
-                            }
-                        }
-                    },
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                categories.forEach { category ->
-                    val isSelected = category == selectedCategory
-                    FilterChip(
-                        selected = isSelected,
-                        onClick = {
-                            selectedCategory = category
-                            deckIndex.value = 0
-                        },
-                        label = { Text(category, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = CommunityBadge,
-                            selectedLabelColor = Color.White,
-                            containerColor = Color.White,
-                            labelColor = PrimaryText
-                        ),
-                        shape = CircleShape
-                    )
                 }
             }
 
