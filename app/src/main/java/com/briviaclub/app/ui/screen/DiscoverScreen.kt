@@ -18,20 +18,32 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,24 +53,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.briviaclub.app.ui.theme.BriviaClubAppTheme
-import com.briviaclub.app.ui.theme.ChampagneGold
 import com.briviaclub.app.ui.theme.CommunityBadge
 import com.briviaclub.app.ui.theme.PrimaryBackground
 import com.briviaclub.app.ui.theme.PrimaryText
 import com.briviaclub.app.ui.theme.SecondaryText
 
+private val TagBgLight = Color(0xFFF3ECEE)
+private val CardBorderColor = Color(0xFFEFE6E8)
+
 private data class PartnerProfile(
     val initial: String,
     val name: String,
+    val age: String,
     val role: String,
+    val location: String,
     val tagline: String,
-    val skillFit: String,
+    val matchPercent: String,
     val verified: String,
     val bio: String,
     val interests: List<String>
@@ -68,52 +85,62 @@ private val sampleDeck = listOf(
     PartnerProfile(
         initial = "A",
         name = "Ananya Rao",
+        age = "24",
         role = "Product Designer • NID",
+        location = "Bengaluru • 5 km away",
         tagline = "Hackathon mentor • AI UX • Fintech",
-        skillFit = "Skill fit: 94%",
+        matchPercent = "94%",
         verified = "Verified Builder",
-        bio = "Building AI-driven design systems. Looking for a fullstack co-founder to ship scalable MVP for B2B SaaS.",
-        interests = listOf("🎨 Figma", "⚡ React", "🤖 LLMs", "📍 Bengaluru")
+        bio = "Building AI-driven design systems. Looking for a fullstack co-founder to ship a scalable MVP for B2B SaaS applications.",
+        interests = listOf("🎨 Figma", "⚡ React", "🤖 LLMs", "📍 Bengaluru", "💼 Co-founder", "🏆 Hackathons")
     ),
     PartnerProfile(
         initial = "D",
         name = "Dev Patel",
+        age = "26",
         role = "Full-stack engineer • IIT Bombay",
+        location = "Pune • 8 km away",
         tagline = "Node.js • Startup ops • Growth",
-        skillFit = "Skill fit: 92%",
+        matchPercent = "92%",
         verified = "Verified Builder",
         bio = "Shipped 3 MVPs in 18 months. Looking to pair with a sharp product/design mind for the next AI-native tool.",
-        interests = listOf("⚛️ React", "🟢 Node", "☁️ AWS", "📍 Pune")
+        interests = listOf("⚛️ React", "🟢 Node", "☁️ AWS", "📍 Pune", "💼 Co-founder", "🚀 Startups")
     ),
     PartnerProfile(
         initial = "R",
         name = "Rhea Sen",
+        age = "29",
         role = "Product Lead • Mumbai",
+        location = "Mumbai • 12 km away",
         tagline = "Design systems • Brand building • Growth",
-        skillFit = "Skill fit: 91%",
+        matchPercent = "91%",
         verified = "Verified Builder",
         bio = "Ex-fintech PM leading product discovery. Seeking a technical co-founder for a vertical SaaS experiment.",
-        interests = listOf("📊 Metrics", "🧠 Strategy", "💼 SaaS", "📍 Mumbai")
+        interests = listOf("📊 Metrics", "🧠 Strategy", "💼 SaaS", "📍 Mumbai", "💼 Co-founder", "🏆 Hackathons")
     ),
     PartnerProfile(
         initial = "K",
         name = "Kabir Mehta",
+        age = "34",
         role = "Startup advisor • Bengaluru",
+        location = "Bengaluru • 2 km away",
         tagline = "Scale-ups • Investor relations • Strategy",
-        skillFit = "Skill fit: 89%",
+        matchPercent = "89%",
         verified = "Verified Builder",
         bio = "Two exits under my belt. Mentoring first-time founders; open to advisory or a founding CTO role.",
-        interests = listOf("🚀 Scale", "💡 Mentorship", "🤝 Networks", "📍 Bengaluru")
+        interests = listOf("🚀 Scale", "💡 Mentorship", "🤝 Networks", "📍 Bengaluru", "💼 Advisor", "🏆 Exits")
     ),
     PartnerProfile(
         initial = "N",
         name = "Naina Kapoor",
+        age = "27",
         role = "Community lead • Pune",
+        location = "Pune • 15 km away",
         tagline = "Network building • User research • Ops",
-        skillFit = "Skill fit: 90%",
+        matchPercent = "90%",
         verified = "Verified Builder",
         bio = "Building developer communities. Looking for co-hosts and builder partners for regional hackathons.",
-        interests = listOf("🎪 Events", "🧑‍🤝‍🧑 Community", "📣 DevRel", "📍 Pune")
+        interests = listOf("🎪 Events", "🧑‍🤝‍🧑 Community", "📣 DevRel", "📍 Pune", "🏆 Hackathons", "💼 Networking")
     )
 )
 
@@ -121,6 +148,8 @@ private val sampleDeck = listOf(
 @Composable
 fun DiscoverScreen(onNavigateMatches: () -> Unit) {
     var selectedCategory by remember { mutableStateOf("Co-founders") }
+    var showDetailsSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val categories = listOf("Hackathons", "Co-founders", "Startups", "Gigs")
 
     val deckIndex = remember { mutableStateOf(0) }
@@ -138,21 +167,20 @@ fun DiscoverScreen(onNavigateMatches: () -> Unit) {
                 .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
                     text = "Discover your next\nbuild partner",
-                    fontSize = 30.sp,
+                    fontSize = 28.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = PrimaryText,
-                    lineHeight = 36.sp
+                    lineHeight = 34.sp
                 )
                 Text(
-                    text = "Swipe premium decks now — AI-curated, verified, and ready to meet.",
-                    fontSize = 14.sp,
-                    color = SecondaryText,
-                    lineHeight = 20.sp
+                    text = "AI-curated, verified, and ready to meet.",
+                    fontSize = 13.sp,
+                    color = SecondaryText
                 )
             }
 
@@ -165,12 +193,7 @@ fun DiscoverScreen(onNavigateMatches: () -> Unit) {
                     FilterChip(
                         selected = isSelected,
                         onClick = { selectedCategory = category },
-                        label = {
-                            Text(
-                                text = category,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                            )
-                        },
+                        label = { Text(category, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = CommunityBadge,
                             selectedLabelColor = Color.White,
@@ -182,7 +205,11 @@ fun DiscoverScreen(onNavigateMatches: () -> Unit) {
                 }
             }
 
-            PartnerCard(profile = profile)
+            FullPhotoCard(
+                profile = profile,
+                onViewDetails = { showDetailsSheet = true },
+                modifier = Modifier.weight(1f)
+            )
 
             Spacer(modifier = Modifier.height(70.dp))
         }
@@ -190,10 +217,10 @@ fun DiscoverScreen(onNavigateMatches: () -> Unit) {
         Row(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 24.dp)
+                .padding(bottom = 20.dp)
                 .clip(CircleShape)
                 .background(Color.White)
-                .border(1.dp, Color(0xFFEFE8E2), CircleShape)
+                .border(1.dp, CardBorderColor, CircleShape)
                 .padding(horizontal = 20.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(24.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -207,11 +234,7 @@ fun DiscoverScreen(onNavigateMatches: () -> Unit) {
                     .clip(CircleShape)
                     .background(PrimaryBackground)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Pass",
-                    tint = PrimaryText
-                )
+                Icon(Icons.Default.Close, contentDescription = "Pass", tint = PrimaryText)
             }
 
             IconButton(
@@ -221,11 +244,7 @@ fun DiscoverScreen(onNavigateMatches: () -> Unit) {
                     .clip(CircleShape)
                     .background(PrimaryText)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Send,
-                    contentDescription = "Message",
-                    tint = Color.White
-                )
+                Icon(Icons.Default.Send, contentDescription = "Chat", tint = Color.White)
             }
 
             IconButton(
@@ -237,11 +256,223 @@ fun DiscoverScreen(onNavigateMatches: () -> Unit) {
                     .clip(CircleShape)
                     .background(CommunityBadge)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Favorite,
-                    contentDescription = "Connect",
-                    tint = Color.White
+                Icon(Icons.Default.Favorite, contentDescription = "Connect", tint = Color.White)
+            }
+        }
+
+        if (showDetailsSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showDetailsSheet = false },
+                sheetState = sheetState,
+                containerColor = Color.White,
+                shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+            ) {
+                FullProfileDetailsContent(
+                    profile = profile,
+                    onClose = { showDetailsSheet = false }
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FullPhotoCard(
+    profile: PartnerProfile,
+    onViewDetails: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 14.dp)
+                .offset(y = 10.dp),
+            shape = RoundedCornerShape(32.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFE5DDD9))
+        ) {}
+
+        Card(
+            modifier = Modifier
+                .fillMaxSize()
+                .shadow(12.dp, RoundedCornerShape(32.dp)),
+            shape = RoundedCornerShape(32.dp),
+            colors = CardDefaults.cardColors(containerColor = CommunityBadge)
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color(0xFF4A121E),
+                                    CommunityBadge,
+                                    Color(0xFF2B0A12)
+                                )
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = profile.name.uppercase().substringBefore(" "),
+                        color = Color.White.copy(alpha = 0.15f),
+                        fontSize = 64.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color.Transparent,
+                                    Color.Black.copy(alpha = 0.85f)
+                                )
+                            )
+                        )
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.2f))
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = "★ Top Pick",
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Color(0xFF4CAF50))
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = "${profile.matchPercent} Skill Match",
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text(
+                                    text = "${profile.name}, ${profile.age}",
+                                    fontSize = 26.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Color.White
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .size(10.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFF4CAF50))
+                                )
+                            }
+
+                            Text(
+                                text = profile.role,
+                                fontSize = 15.sp,
+                                color = Color.White.copy(alpha = 0.9f),
+                                fontWeight = FontWeight.Medium
+                            )
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.LocationOn,
+                                    contentDescription = null,
+                                    tint = Color.White.copy(alpha = 0.7f),
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Text(
+                                    text = profile.location,
+                                    fontSize = 12.sp,
+                                    color = Color.White.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+
+                        IconButton(
+                            onClick = onViewDetails,
+                            modifier = Modifier
+                                .size(44.dp)
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.25f))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = "View Details",
+                                tint = Color.White
+                            )
+                        }
+                    }
+
+                    Surface(
+                        onClick = onViewDetails,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        color = Color.White.copy(alpha = 0.15f)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "View full profile & bio",
+                                color = Color.White,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowUp,
+                                contentDescription = null,
+                                tint = Color.White
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -249,170 +480,120 @@ fun DiscoverScreen(onNavigateMatches: () -> Unit) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun PartnerCard(profile: PartnerProfile) {
-    Box(
+private fun FullProfileDetailsContent(
+    profile: PartnerProfile,
+    onClose: () -> Unit
+) {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(420.dp)
-            .padding(vertical = 12.dp),
-        contentAlignment = Alignment.Center
+            .padding(horizontal = 24.dp)
+            .padding(bottom = 32.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        Card(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp)
-                .offset(y = 12.dp),
-            shape = RoundedCornerShape(28.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFEFE8E2)),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-        ) {}
-
-        Card(
-            modifier = Modifier
-                .fillMaxSize()
-                .shadow(8.dp, RoundedCornerShape(28.dp)),
-            shape = RoundedCornerShape(28.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(
+            Column {
+                Text(
+                    text = profile.name,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = PrimaryText
+                )
+                Text(
+                    text = profile.role,
+                    fontSize = 14.sp,
+                    color = SecondaryText
+                )
+            }
+            IconButton(
+                onClick = onClose,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.SpaceBetween
+                    .clip(CircleShape)
+                    .background(PrimaryBackground)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(54.dp)
-                                .clip(CircleShape)
-                                .background(CommunityBadge),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = profile.initial,
-                                color = Color.White,
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Close", tint = PrimaryText)
+            }
+        }
 
-                        Column {
-                            Text(
-                                text = profile.name,
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = PrimaryText
-                            )
-                            Text(
-                                text = profile.role,
-                                fontSize = 13.sp,
-                                color = SecondaryText
-                            )
-                        }
-                    }
+        Divider(color = TagBgLight)
 
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(TagBgLight)
+                    .padding(vertical = 12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("Skill Fit", fontSize = 11.sp, color = SecondaryText)
+                    Text(profile.matchPercent, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = CommunityBadge)
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(TagBgLight)
+                    .padding(vertical = 12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("Status", fontSize = 11.sp, color = SecondaryText)
+                    Text(profile.verified, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = PrimaryText)
+                }
+            }
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("About", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = PrimaryText)
+            Text(
+                text = profile.bio,
+                fontSize = 14.sp,
+                color = SecondaryText,
+                lineHeight = 22.sp
+            )
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("Skills & Focus Areas", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = PrimaryText)
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                profile.interests.forEach { tag ->
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(Color(0xFFF3ECEE))
-                            .padding(horizontal = 10.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = "Top pick",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = CommunityBadge
-                        )
-                    }
-                }
-
-                Text(
-                    text = profile.tagline,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = ChampagneGold
-                )
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(14.dp))
                             .background(PrimaryBackground)
-                            .padding(vertical = 10.dp),
-                        contentAlignment = Alignment.Center
+                            .border(1.dp, CardBorderColor, CircleShape)
+                            .padding(horizontal = 14.dp, vertical = 8.dp)
                     ) {
-                        Text(
-                            text = profile.skillFit,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = PrimaryText
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(Color(0xFFF3ECEE))
-                            .padding(vertical = 10.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = profile.verified,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = CommunityBadge
-                        )
-                    }
-                }
-
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(
-                        text = "About",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = PrimaryText
-                    )
-                    Text(
-                        text = profile.bio,
-                        fontSize = 13.sp,
-                        color = SecondaryText,
-                        lineHeight = 18.sp
-                    )
-                }
-
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    profile.interests.forEach { tag ->
-                        Box(
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .background(PrimaryBackground)
-                                .padding(horizontal = 10.dp, vertical = 4.dp)
-                        ) {
-                            Text(
-                                text = tag,
-                                fontSize = 11.sp,
-                                color = PrimaryText
-                            )
-                        }
+                        Text(text = tag, fontSize = 13.sp, color = PrimaryText, fontWeight = FontWeight.Medium)
                     }
                 }
             }
+        }
+
+        Button(
+            onClick = onClose,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(54.dp),
+            shape = CircleShape,
+            colors = ButtonDefaults.buttonColors(containerColor = CommunityBadge)
+        ) {
+            Text("Connect with ${profile.name.substringBefore(" ")}", fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
