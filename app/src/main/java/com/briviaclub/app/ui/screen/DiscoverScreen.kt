@@ -2,8 +2,10 @@ package com.briviaclub.app.ui.screen
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -43,6 +46,7 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -60,9 +64,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.briviaclub.app.ui.theme.BriviaClubAppTheme
 import com.briviaclub.app.ui.theme.CommunityBadge
 import com.briviaclub.app.ui.theme.PrimaryBackground
@@ -153,7 +160,8 @@ private val sampleDeck = listOf(
 @Composable
 fun DiscoverScreen(onNavigateMatches: () -> Unit) {
     var selectedCategory by remember { mutableStateOf("Co-founders") }
-    var showDetailsSheet by remember { mutableStateOf(false) }
+    var sheetProfile by remember { mutableStateOf<PartnerProfile?>(null) }
+    var matchProfile by remember { mutableStateOf<PartnerProfile?>(null) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val categories = listOf("Hackathons", "Co-founders", "Startups", "Gigs")
 
@@ -239,7 +247,7 @@ fun DiscoverScreen(onNavigateMatches: () -> Unit) {
 
             FullPhotoCard(
                 profile = profile,
-                onViewDetails = { showDetailsSheet = true },
+                onViewDetails = { sheetProfile = profile },
                 modifier = Modifier.weight(1f)
             )
 
@@ -281,6 +289,7 @@ fun DiscoverScreen(onNavigateMatches: () -> Unit) {
 
             IconButton(
                 onClick = {
+                    matchProfile = profile
                     deckIndex.value = (deckIndex.value + 1) % sampleDeck.size
                 },
                 modifier = Modifier
@@ -292,17 +301,117 @@ fun DiscoverScreen(onNavigateMatches: () -> Unit) {
             }
         }
 
-        if (showDetailsSheet) {
+        sheetProfile?.let { matched ->
             ModalBottomSheet(
-                onDismissRequest = { showDetailsSheet = false },
+                onDismissRequest = { sheetProfile = null },
                 sheetState = sheetState,
                 containerColor = Color.White,
                 shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
             ) {
                 FullProfileDetailsContent(
-                    profile = profile,
-                    onClose = { showDetailsSheet = false }
+                    profile = matched,
+                    onClose = { sheetProfile = null }
                 )
+            }
+        }
+
+        matchProfile?.let { matched ->
+            val firstName = matched.name.split(" ").first()
+            Dialog(
+                onDismissRequest = { matchProfile = null },
+                properties = DialogProperties(usePlatformDefaultWidth = false)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.7f))
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) { matchProfile = null },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 28.dp),
+                        shape = RoundedCornerShape(28.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp, vertical = 28.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .clip(CircleShape)
+                                    .background(CommunityBadge.copy(alpha = 0.12f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    Icons.Default.Favorite,
+                                    contentDescription = "Match",
+                                    tint = CommunityBadge,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
+
+                            Text(
+                                text = "It's a Match!",
+                                fontSize = 26.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = PrimaryText
+                            )
+
+                            Text(
+                                text = "You and $firstName liked each other.\nStart building together!",
+                                fontSize = 14.sp,
+                                color = SecondaryText,
+                                textAlign = TextAlign.Center,
+                                lineHeight = 20.sp
+                            )
+
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            Button(
+                                onClick = onNavigateMatches,
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = CommunityBadge,
+                                    contentColor = Color.White
+                                ),
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+                                Text(
+                                    "Send Message",
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(vertical = 4.dp)
+                                )
+                            }
+
+                            OutlinedButton(
+                                onClick = {
+                                    matchProfile = null
+                                    sheetProfile = matched
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = PrimaryText),
+                                border = BorderStroke(1.dp, CardBorderColor),
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+                                Text(
+                                    "View Profile",
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(vertical = 4.dp)
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
