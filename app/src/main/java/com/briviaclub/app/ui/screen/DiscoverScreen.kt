@@ -34,7 +34,6 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -278,20 +277,7 @@ fun DiscoverScreen(onNavigateMatches: () -> Unit) {
             }
 
             IconButton(
-                onClick = onNavigateMatches,
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(PrimaryText)
-            ) {
-                Icon(Icons.Default.Send, contentDescription = "Chat", tint = Color.White)
-            }
-
-            IconButton(
-                onClick = {
-                    matchProfile = profile
-                    deckIndex.value = (deckIndex.value + 1) % sampleDeck.size
-                },
+                onClick = { matchProfile = profile },
                 modifier = Modifier
                     .size(52.dp)
                     .clip(CircleShape)
@@ -318,7 +304,10 @@ fun DiscoverScreen(onNavigateMatches: () -> Unit) {
         matchProfile?.let { matched ->
             val firstName = matched.name.split(" ").first()
             Dialog(
-                onDismissRequest = { matchProfile = null },
+                onDismissRequest = {
+                    matchProfile = null
+                    deckIndex.value = (deckIndex.value + 1) % sampleDeck.size
+                },
                 properties = DialogProperties(usePlatformDefaultWidth = false)
             ) {
                 Box(
@@ -328,7 +317,10 @@ fun DiscoverScreen(onNavigateMatches: () -> Unit) {
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
-                        ) { matchProfile = null },
+                        ) {
+                            matchProfile = null
+                            deckIndex.value = (deckIndex.value + 1) % sampleDeck.size
+                        },
                     contentAlignment = Alignment.Center
                 ) {
                     Card(
