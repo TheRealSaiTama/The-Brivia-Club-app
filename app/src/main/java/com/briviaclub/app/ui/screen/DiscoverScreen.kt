@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -45,6 +46,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,6 +66,7 @@ import com.briviaclub.app.ui.theme.CommunityBadge
 import com.briviaclub.app.ui.theme.PrimaryBackground
 import com.briviaclub.app.ui.theme.PrimaryText
 import com.briviaclub.app.ui.theme.SecondaryText
+import kotlinx.coroutines.delay
 
 private val TagBgLight = Color(0xFFF3ECEE)
 private val CardBorderColor = Color(0xFFEFE6E8)
@@ -154,6 +157,14 @@ fun DiscoverScreen(onNavigateMatches: () -> Unit) {
 
     val deckIndex = remember { mutableStateOf(0) }
     val profile = sampleDeck[deckIndex.value % sampleDeck.size]
+    val chipListState = rememberLazyListState()
+
+    LaunchedEffect(Unit) {
+        delay(400)
+        chipListState.animateScrollToItem(index = categories.size - 1)
+        delay(700)
+        chipListState.animateScrollToItem(index = 0)
+    }
 
     Box(
         modifier = Modifier
@@ -185,6 +196,7 @@ fun DiscoverScreen(onNavigateMatches: () -> Unit) {
             }
 
             LazyRow(
+                state = chipListState,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
