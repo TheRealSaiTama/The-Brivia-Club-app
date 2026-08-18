@@ -1,9 +1,15 @@
-﻿package com.briviaclub.app.ui.screen
+package com.briviaclub.app.ui.screen
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,18 +25,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -41,659 +54,818 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.briviaclub.app.ui.theme.BriviaClubAppTheme
-import com.briviaclub.app.ui.theme.CommunityBadge
-import com.briviaclub.app.ui.theme.PrimaryBackground
-import com.briviaclub.app.ui.theme.PrimaryText
-import com.briviaclub.app.ui.theme.SecondaryText
 import coil.compose.AsyncImage
-
-private val TagBgLight = Color(0xFFF3ECEE)
-private val CardBorderColor = Color(0xFFEFE6E8)
-
-private data class PartnerProfile(
-    val initial: String,
-    val name: String,
-    val age: String,
-    val role: String,
-    val location: String,
-    val city: String,
-    val category: String,
-    val tagline: String,
-    val matchPercent: String,
-    val verified: String,
-    val bio: String,
-    val interests: List<String>,
-    val photoUrl: String
-)
-
-private val sampleDeck = listOf(
-    PartnerProfile(
-        initial = "A",
-        name = "Ananya Rao",
-        age = "24",
-        role = "Product Designer â€¢ NID",
-        location = "Bengaluru â€¢ 5 km away",
-        city = "Bengaluru",
-        category = "Co-founders",
-        tagline = "Hackathon mentor â€¢ AI UX â€¢ Fintech",
-        matchPercent = "94%",
-        verified = "Verified Builder",
-        bio = "Building AI-driven design systems. Looking for a fullstack co-founder to ship a scalable MVP for B2B SaaS applications.",
-        interests = listOf("ðŸŽ¨ Figma", "âš¡ React", "ðŸ¤– LLMs", "ðŸ“ Bengaluru", "ðŸ’¼ Co-founder", "ðŸ† Hackathons"),
-        photoUrl = "https://randomuser.me/api/portraits/women/44.jpg"
-    ),
-    PartnerProfile(
-        initial = "D",
-        name = "Dev Patel",
-        age = "26",
-        role = "Full-stack engineer â€¢ IIT Bombay",
-        location = "Pune â€¢ 8 km away",
-        city = "Pune",
-        category = "Co-founders",
-        tagline = "Node.js â€¢ Startup ops â€¢ Growth",
-        matchPercent = "92%",
-        verified = "Verified Builder",
-        bio = "Shipped 3 MVPs in 18 months. Looking to pair with a sharp product/design mind for the next AI-native tool.",
-        interests = listOf("âš›ï¸ React", "ðŸŸ¢ Node", "â˜ï¸ AWS", "ðŸ“ Pune", "ðŸ’¼ Co-founder", "ðŸš€ Startups"),
-        photoUrl = "https://randomuser.me/api/portraits/men/32.jpg"
-    ),
-    PartnerProfile(
-        initial = "R",
-        name = "Rhea Sen",
-        age = "29",
-        role = "Product Lead â€¢ Mumbai",
-        location = "Mumbai â€¢ 12 km away",
-        city = "Mumbai",
-        category = "Startups",
-        tagline = "Design systems â€¢ Brand building â€¢ Growth",
-        matchPercent = "91%",
-        verified = "Verified Builder",
-        bio = "Ex-fintech PM leading product discovery. Seeking a technical co-founder for a vertical SaaS experiment.",
-        interests = listOf("ðŸ“Š Metrics", "ðŸ§  Strategy", "ðŸ’¼ SaaS", "ðŸ“ Mumbai", "ðŸ’¼ Co-founder", "ðŸ† Hackathons"),
-        photoUrl = "https://randomuser.me/api/portraits/women/68.jpg"
-    ),
-    PartnerProfile(
-        initial = "K",
-        name = "Kabir Mehta",
-        age = "34",
-        role = "Startup advisor â€¢ Bengaluru",
-        location = "Bengaluru â€¢ 2 km away",
-        city = "Bengaluru",
-        category = "Gigs",
-        tagline = "Scale-ups â€¢ Investor relations â€¢ Strategy",
-        matchPercent = "89%",
-        verified = "Verified Builder",
-        bio = "Two exits under my belt. Mentoring first-time founders; open to advisory or a founding CTO role.",
-        interests = listOf("ðŸš€ Scale", "ðŸ’¡ Mentorship", "ðŸ¤ Networks", "ðŸ“ Bengaluru", "ðŸ’¼ Advisor", "ðŸ† Exits"),
-        photoUrl = "https://randomuser.me/api/portraits/men/75.jpg"
-    ),
-    PartnerProfile(
-        initial = "N",
-        name = "Naina Kapoor",
-        age = "27",
-        role = "Community lead â€¢ Pune",
-        location = "Pune â€¢ 15 km away",
-        city = "Pune",
-        category = "Hackathons",
-        tagline = "Network building â€¢ User research â€¢ Ops",
-        matchPercent = "90%",
-        verified = "Verified Builder",
-        bio = "Building developer communities. Looking for co-hosts and builder partners for regional hackathons.",
-        interests = listOf("ðŸŽª Events", "ðŸ§‘â€ðŸ¤â€ðŸ§‘ Community", "ðŸ“£ DevRel", "ðŸ“ Pune", "ðŸ† Hackathons", "ðŸ’¼ Networking"),
-        photoUrl = "https://randomuser.me/api/portraits/women/65.jpg"
-    )
-)
+import com.briviaclub.app.data.local.entity.UserEntity
+import com.briviaclub.app.ui.components.BriviaTopBar
+import com.briviaclub.app.ui.components.MemberActivityFeedComponent
+import com.briviaclub.app.ui.components.NotificationCenterSheet
+import com.briviaclub.app.ui.theme.AmberGold
+import com.briviaclub.app.ui.theme.ChampagneGold
+import com.briviaclub.app.ui.theme.CommunityBadge
+import com.briviaclub.app.ui.theme.DeepWine
+import com.briviaclub.app.ui.theme.EmeraldVerified
+import com.briviaclub.app.ui.theme.SuperLikeBlue
+import com.briviaclub.app.ui.viewmodel.BriviaViewModel
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun DiscoverScreen(onNavigateChat: (name: String, initial: String, role: String) -> Unit) {
-    var selectedCategory by remember { mutableStateOf("All") }
-    var filterLocation by remember { mutableStateOf("All locations") }
-    var showFilterSheet by remember { mutableStateOf(false) }
-    var sheetProfile by remember { mutableStateOf<PartnerProfile?>(null) }
-    var matchProfile by remember { mutableStateOf<PartnerProfile?>(null) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val filterSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val categories = listOf("All", "Hackathons", "Co-founders", "Startups", "Gigs")
-    val locations = listOf("All locations", "Bengaluru", "Pune", "Mumbai")
+fun DiscoverScreen(
+    viewModel: BriviaViewModel,
+    onNavigateChat: (matchId: String, partnerName: String, partnerInitial: String, partnerRole: String) -> Unit,
+    onNavigateUpgrade: () -> Unit
+) {
+    val feed by viewModel.filteredFeed.collectAsState()
+    val filter by viewModel.currentFilter.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
+    val matchCelebration by viewModel.matchCelebration.collectAsState()
+    val subscription by viewModel.subscription.collectAsState()
+    val unreadNotificationsCount by viewModel.unreadNotificationsCount.collectAsState()
 
-    val deckIndex = remember { mutableStateOf(0) }
-    val filteredDeck = remember(filterLocation, selectedCategory) {
-        sampleDeck.filter { profile ->
-            (filterLocation == "All locations" || profile.city == filterLocation) &&
-                (selectedCategory == "All" || profile.category == selectedCategory)
-        }
-    }
-    val profile = if (filteredDeck.isEmpty()) null else filteredDeck[deckIndex.value % filteredDeck.size]
+    var showFilterSheet by remember { mutableStateOf(false) }
+    var showNotificationCenter by remember { mutableStateOf(false) }
+    var selectedProfileForDetail by remember { mutableStateOf<UserEntity?>(null) }
+    var reportDialogUser by remember { mutableStateOf<UserEntity?>(null) }
+    var showReportReasonDialog by remember { mutableStateOf(false) }
+    var reportReason by remember { mutableStateOf("") }
+
+    val filterSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val detailSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    val isDark = MaterialTheme.colorScheme.background.red < 0.2f
+    var discoverViewMode by remember { mutableStateOf("deck") } // "deck" or "pulse"
+
+    // Current top card in deck
+    val currentCard = feed.firstOrNull()
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(PrimaryBackground)
+            .background(MaterialTheme.colorScheme.background)
             .systemBarsPadding()
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(2.dp))
 
+            // Top Brand Header with Luxury Typography & Actions
+            val activeFilterCount = (if (filter.locationFilter != "All locations") 1 else 0) +
+                    (if (filter.categoryFilter != "All") 1 else 0) +
+                    (if (filter.minMatchPercent > 60) 1 else 0)
+
+            BriviaTopBar(
+                onOpenFilters = { showFilterSheet = true },
+                activeFilterCount = activeFilterCount,
+                isDark = isDark,
+                onToggleTheme = { viewModel.toggleDarkTheme() },
+                onOpenNotifications = { showNotificationCenter = true },
+                unreadNotificationsCount = unreadNotificationsCount
+            )
+
+            // Discover Mode Switcher (Deck vs Live Activity Feed)
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(if (isDark) Color(0xFF1E1E24) else Color(0xFFEFEFF4))
+                    .padding(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                // Deck Tab
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (discoverViewMode == "deck") CommunityBadge else Color.Transparent)
+                        .clickable { discoverViewMode = "deck" }
+                        .padding(vertical = 8.dp),
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Discover your next\nbuild partner",
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = PrimaryText,
-                        lineHeight = 34.sp
-                    )
-                    Text(
-                        text = "AI-curated, verified, and ready to meet.",
-                        fontSize = 13.sp,
-                        color = SecondaryText
+                        text = "🎴 Discover Cards (${feed.size})",
+                        fontSize = 12.sp,
+                        fontWeight = if (discoverViewMode == "deck") FontWeight.Bold else FontWeight.Medium,
+                        color = if (discoverViewMode == "deck") Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Surface(
-                    onClick = { showFilterSheet = true },
-                    shape = CircleShape,
-                    color = Color.White,
-                    border = BorderStroke(1.dp, CardBorderColor)
+                // Pulse Tab
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (discoverViewMode == "pulse") CommunityBadge else Color.Transparent)
+                        .clickable { discoverViewMode = "pulse" }
+                        .padding(vertical = 8.dp),
+                    contentAlignment = Alignment.Center
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
-                        Text(
-                            text = "Filters",
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = PrimaryText
+                        Box(
+                            modifier = Modifier
+                                .size(6.dp)
+                                .clip(CircleShape)
+                                .background(if (discoverViewMode == "pulse") Color(0xFF00E676) else CommunityBadge)
                         )
-                        if (filterLocation != "All locations" || selectedCategory != "All") {
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .clip(CircleShape)
-                                    .background(CommunityBadge)
-                            )
-                        }
+                        Text(
+                            text = "⚡ Member Feed",
+                            fontSize = 12.sp,
+                            fontWeight = if (discoverViewMode == "pulse") FontWeight.Bold else FontWeight.Medium,
+                            color = if (discoverViewMode == "pulse") Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             }
 
-            if (profile != null) {
-                FullPhotoCard(
-                    profile = profile,
-                    onViewDetails = { sheetProfile = profile },
+            if (discoverViewMode == "pulse") {
+                // Render Full Member Activity Feed Component
+                MemberActivityFeedComponent(
+                    viewModel = viewModel,
+                    onNavigateChat = onNavigateChat,
                     modifier = Modifier.weight(1f)
                 )
             } else {
+                // Search Bar
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { viewModel.onSearchQueryChange(it) },
+                    placeholder = {
+                        Text(
+                            "Search by name, skill (e.g. AI, Rust), or city...",
+                            fontSize = 13.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { viewModel.onSearchQueryChange("") }) {
+                                Icon(Icons.Default.Close, contentDescription = "Clear", modifier = Modifier.size(18.dp))
+                            }
+                        }
+                    },
+                    singleLine = true,
+                    shape = CircleShape,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        focusedBorderColor = CommunityBadge,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                )
+
+                // Swipe Daily Limits indicator (for free tier)
+                if (subscription?.planId == "free") {
+                    val used = subscription?.dailySwipesUsed ?: 0
+                    val remaining = (20 - used).coerceAtLeast(0)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(CommunityBadge.copy(alpha = 0.08f))
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "🔥 $remaining free swipes left today",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "Upgrade to Pro Unlimited →",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = CommunityBadge,
+                            modifier = Modifier.clickable { onNavigateUpgrade() }
+                        )
+                    }
+                }
+
+                // Main Deck Card Area
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    if (currentCard != null) {
+                        val matchScore = viewModel.calculateMatchScore(currentCard)
+                        InteractiveSwipeCard(
+                            user = currentCard,
+                            matchScore = matchScore,
+                            onSwipeLeft = { viewModel.handleSwipe(currentCard, "pass") },
+                            onSwipeRight = { viewModel.handleSwipe(currentCard, "like") },
+                            onSuperLike = { viewModel.handleSwipe(currentCard, "superlike") },
+                            onViewDetails = { selectedProfileForDetail = currentCard },
+                            onReport = {
+                                reportDialogUser = currentCard
+                                showReportReasonDialog = true
+                            },
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else {
+                        // Empty State
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            shape = RoundedCornerShape(28.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(28.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(14.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(64.dp)
+                                        .clip(CircleShape)
+                                        .background(CommunityBadge.copy(alpha = 0.1f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Refresh,
+                                        contentDescription = null,
+                                        tint = CommunityBadge,
+                                        modifier = Modifier.size(32.dp)
+                                    )
+                                }
+
+                                Text(
+                                    text = "You're all caught up!",
+                                    fontSize = 22.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+
+                                Text(
+                                    text = "No more builders match your current filters. Broaden your location or refresh the club recommendations.",
+                                    fontSize = 13.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center,
+                                    lineHeight = 19.sp
+                                )
+
+                                Row(
+                                    modifier = Modifier.padding(top = 8.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    OutlinedButton(
+                                        onClick = {
+                                            viewModel.updateFilters(
+                                                location = "All locations",
+                                                category = "All",
+                                                distance = 200,
+                                                minMatch = 50,
+                                                sortBy = "match_percent"
+                                            )
+                                            viewModel.refreshFeed()
+                                        },
+                                        shape = CircleShape
+                                    ) {
+                                        Text("Reset Filters", fontWeight = FontWeight.Bold)
+                                    }
+
+                                    Button(
+                                        onClick = { viewModel.refreshFeed() },
+                                        shape = CircleShape,
+                                        colors = ButtonDefaults.buttonColors(containerColor = CommunityBadge)
+                                    ) {
+                                        Text("Refresh Deck", fontWeight = FontWeight.Bold)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Bottom Action Controls (Pass, Super Like, Connect, Rewind)
+                if (currentCard != null) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = "No matches yet",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = PrimaryText
-                        )
-                        Text(
-                            text = "Try changing your location or category filters.",
-                            fontSize = 13.sp,
-                            color = SecondaryText
-                        )
+                        // Rewind / Refresh
+                        IconButton(
+                            onClick = { viewModel.refreshFeed() },
+                            modifier = Modifier
+                                .size(46.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surface)
+                                .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                        ) {
+                            Icon(Icons.Default.Refresh, contentDescription = "Rewind", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        // Pass (X)
+                        IconButton(
+                            onClick = { viewModel.handleSwipe(currentCard, "pass") },
+                            modifier = Modifier
+                                .size(54.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surface)
+                                .border(1.5.dp, Color(0xFFEF4444).copy(alpha = 0.6f), CircleShape)
+                        ) {
+                            Icon(Icons.Default.Close, contentDescription = "Pass", tint = Color(0xFFEF4444), modifier = Modifier.size(26.dp))
+                        }
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        // Super Like (Star)
+                        IconButton(
+                            onClick = { viewModel.handleSwipe(currentCard, "superlike") },
+                            modifier = Modifier
+                                .size(50.dp)
+                                .clip(CircleShape)
+                                .background(SuperLikeBlue.copy(alpha = 0.15f))
+                                .border(1.5.dp, SuperLikeBlue, CircleShape)
+                        ) {
+                            Icon(Icons.Default.Star, contentDescription = "Super Like", tint = SuperLikeBlue, modifier = Modifier.size(24.dp))
+                        }
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        // Connect / Like (Heart)
+                        IconButton(
+                            onClick = { viewModel.handleSwipe(currentCard, "like") },
+                            modifier = Modifier
+                                .size(58.dp)
+                                .shadow(6.dp, CircleShape)
+                                .clip(CircleShape)
+                                .background(CommunityBadge)
+                        ) {
+                            Icon(Icons.Default.Favorite, contentDescription = "Connect", tint = Color.White, modifier = Modifier.size(28.dp))
+                        }
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(70.dp))
         }
 
-        Row(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 20.dp)
-                .clip(CircleShape)
-                .background(Color.White)
-                .border(1.dp, CardBorderColor, CircleShape)
-                .padding(horizontal = 20.dp, vertical = 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(24.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(
-                onClick = {
-                    deckIndex.value = (deckIndex.value + 1) % maxOf(filteredDeck.size, 1)
+        // Match Celebration Modal Overlay
+        matchCelebration?.let { matchedUser ->
+            MatchCelebrationDialog(
+                user = matchedUser,
+                onDismiss = { viewModel.dismissMatchCelebration() },
+                onSendMessage = {
+                    val matchId = "match_me_builder_001_${matchedUser.id}"
+                    viewModel.dismissMatchCelebration()
+                    onNavigateChat(
+                        matchId,
+                        matchedUser.name,
+                        matchedUser.name.take(1),
+                        matchedUser.role
+                    )
                 },
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(PrimaryBackground)
-            ) {
-                Icon(Icons.Default.Close, contentDescription = "Pass", tint = PrimaryText)
-            }
-
-            IconButton(
-                onClick = {
-                    profile?.let { matchedProfile ->
-                        matchProfile = matchedProfile
-                    }
-                },
-                modifier = Modifier
-                    .size(52.dp)
-                    .clip(CircleShape)
-                    .background(CommunityBadge)
-            ) {
-                Icon(Icons.Default.Favorite, contentDescription = "Connect", tint = Color.White)
-            }
+                onViewProfile = {
+                    viewModel.dismissMatchCelebration()
+                    selectedProfileForDetail = matchedUser
+                }
+            )
         }
 
-        sheetProfile?.let { matched ->
+        // Full Profile Detail BottomSheet
+        selectedProfileForDetail?.let { detailUser ->
             ModalBottomSheet(
-                onDismissRequest = { sheetProfile = null },
-                sheetState = sheetState,
-                containerColor = Color.White,
-                shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                onDismissRequest = { selectedProfileForDetail = null },
+                sheetState = detailSheetState,
+                containerColor = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
             ) {
-                FullProfileDetailsContent(
-                    profile = matched,
-                    onClose = { sheetProfile = null }
+                FullProfileBottomSheetContent(
+                    user = detailUser,
+                    matchScore = viewModel.calculateMatchScore(detailUser),
+                    onClose = { selectedProfileForDetail = null },
+                    onConnect = {
+                        viewModel.handleSwipe(detailUser, "like")
+                        selectedProfileForDetail = null
+                    },
+                    onReport = {
+                        reportDialogUser = detailUser
+                        showReportReasonDialog = true
+                        selectedProfileForDetail = null
+                    }
                 )
             }
         }
 
+        // Filter BottomSheet
         if (showFilterSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showFilterSheet = false },
                 sheetState = filterSheetState,
-                containerColor = Color.White,
+                containerColor = MaterialTheme.colorScheme.surface,
                 shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
             ) {
-                Column(
+                FilterBottomSheetContent(
+                    currentFilter = filter,
+                    onApply = { loc, cat, dist, minM, sort ->
+                        viewModel.updateFilters(loc, cat, dist, minM, sort)
+                        showFilterSheet = false
+                    },
+                    onClose = { showFilterSheet = false }
+                )
+            }
+        }
+
+        // Report / Block Dialog
+        if (showReportReasonDialog && reportDialogUser != null) {
+            Dialog(onDismissRequest = { showReportReasonDialog = false }) {
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
-                        .padding(bottom = 32.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                        .padding(16.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Filters",
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = PrimaryText
-                        )
-
-                        TextButton(
-                            onClick = {
-                                filterLocation = "All locations"
-                                selectedCategory = "All"
-                                deckIndex.value = 0
-                            },
-                            enabled = filterLocation != "All locations" || selectedCategory != "All"
-                        ) {
-                            Text("Clear all", color = CommunityBadge, fontWeight = FontWeight.Bold)
-                        }
-                    }
-
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Location", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = PrimaryText)
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            locations.forEach { location ->
-                                val isSelected = location == filterLocation
-                                FilterChip(
-                                    selected = isSelected,
-                                    onClick = {
-                                        filterLocation = location
-                                        deckIndex.value = 0
-                                    },
-                                    label = { Text(location, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = CommunityBadge,
-                                        selectedLabelColor = Color.White,
-                                        containerColor = PrimaryBackground,
-                                        labelColor = PrimaryText
-                                    ),
-                                    shape = CircleShape
-                                )
-                            }
-                        }
-                    }
-
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Category", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = PrimaryText)
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            categories.forEach { category ->
-                                val isSelected = category == selectedCategory
-                                FilterChip(
-                                    selected = isSelected,
-                                    onClick = {
-                                        selectedCategory = category
-                                        deckIndex.value = 0
-                                    },
-                                    label = { Text(category, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = CommunityBadge,
-                                        selectedLabelColor = Color.White,
-                                        containerColor = PrimaryBackground,
-                                        labelColor = PrimaryText
-                                    ),
-                                    shape = CircleShape
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    Button(
-                        onClick = { showFilterSheet = false },
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(52.dp),
-                        shape = CircleShape,
-                        colors = ButtonDefaults.buttonColors(containerColor = CommunityBadge)
+                            .padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
-                        Text("Apply filters", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                        Text(
+                            text = "Report / Block Builder",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "Tell us what happened with ${reportDialogUser?.name}. We review all community flags within 2 hours.",
+                            fontSize = 13.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        OutlinedTextField(
+                            value = reportReason,
+                            onValueChange = { reportReason = it },
+                            label = { Text("Reason (Spam, Harassment, Fake Profile)") },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = {
+                                    reportDialogUser?.let { viewModel.blockUser(it.id, reportReason.ifBlank { "User Blocked" }) }
+                                    showReportReasonDialog = false
+                                },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text("Block User", color = Color(0xFFEF4444))
+                            }
+
+                            Button(
+                                onClick = {
+                                    reportDialogUser?.let { viewModel.reportUser(it.id, reportReason.ifBlank { "Flagged Report" }) }
+                                    showReportReasonDialog = false
+                                },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = CommunityBadge)
+                            ) {
+                                Text("Submit Report")
+                            }
+                        }
                     }
                 }
             }
         }
 
-        matchProfile?.let { matched ->
-            val firstName = matched.name.split(" ").first()
-            Dialog(
-                onDismissRequest = {
-                    matchProfile = null
-                    deckIndex.value = (deckIndex.value + 1) % maxOf(filteredDeck.size, 1)
-                },
-                properties = DialogProperties(usePlatformDefaultWidth = false)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.7f))
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null
-                        ) {
-                            matchProfile = null
-                            deckIndex.value = (deckIndex.value + 1) % maxOf(filteredDeck.size, 1)
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 28.dp),
-                        shape = RoundedCornerShape(28.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White)
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 24.dp, vertical = 28.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(64.dp)
-                                    .clip(CircleShape)
-                                    .background(CommunityBadge.copy(alpha = 0.12f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    Icons.Default.Favorite,
-                                    contentDescription = "Match",
-                                    tint = CommunityBadge,
-                                    modifier = Modifier.size(32.dp)
-                                )
-                            }
-
-                            Text(
-                                text = "It's a Match!",
-                                fontSize = 26.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = PrimaryText
-                            )
-
-                            Text(
-                                text = "You and $firstName liked each other.\nStart building together!",
-                                fontSize = 14.sp,
-                                color = SecondaryText,
-                                textAlign = TextAlign.Center,
-                                lineHeight = 20.sp
-                            )
-
-                            Spacer(modifier = Modifier.height(4.dp))
-
-                            Button(
-                                onClick = { onNavigateChat(matched.name, matched.initial, matched.role) },
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = CommunityBadge,
-                                    contentColor = Color.White
-                                ),
-                                shape = RoundedCornerShape(16.dp)
-                            ) {
-                                Text(
-                                    "Send Message",
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(vertical = 4.dp)
-                                )
-                            }
-
-                            OutlinedButton(
-                                onClick = {
-                                    matchProfile = null
-                                    sheetProfile = matched
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = PrimaryText),
-                                border = BorderStroke(1.dp, CardBorderColor),
-                                shape = RoundedCornerShape(16.dp)
-                            ) {
-                                Text(
-                                    "View Profile",
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(vertical = 4.dp)
-                                )
-                            }
-                        }
+        // Notification Center Sheet
+        if (showNotificationCenter) {
+            NotificationCenterSheet(
+                viewModel = viewModel,
+                onDismiss = { showNotificationCenter = false },
+                onNavigateToDestination = { dest ->
+                    showNotificationCenter = false
+                    if (dest == "feed") {
+                        discoverViewMode = "pulse"
+                    } else if (dest == "membership") {
+                        onNavigateUpgrade()
                     }
                 }
-            }
+            )
         }
     }
 }
 
 @Composable
-private fun FullPhotoCard(
-    profile: PartnerProfile,
+private fun InteractiveSwipeCard(
+    user: UserEntity,
+    matchScore: Int,
+    onSwipeLeft: () -> Unit,
+    onSwipeRight: () -> Unit,
+    onSuperLike: () -> Unit,
     onViewDetails: () -> Unit,
+    onReport: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val offsetX = remember { Animatable(0f) }
+    val offsetY = remember { Animatable(0f) }
+
     Box(
         modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        contentAlignment = Alignment.Center
+            .padding(vertical = 4.dp)
+            .pointerInput(user.id) {
+                detectDragGestures(
+                    onDrag = { change, dragAmount ->
+                        change.consume()
+                        coroutineScope.launch {
+                            offsetX.snapTo(offsetX.value + dragAmount.x)
+                            offsetY.snapTo(offsetY.value + dragAmount.y)
+                        }
+                    },
+                    onDragEnd = {
+                        coroutineScope.launch {
+                            if (offsetX.value > 220f) {
+                                onSwipeRight()
+                                offsetX.snapTo(0f)
+                                offsetY.snapTo(0f)
+                            } else if (offsetX.value < -220f) {
+                                onSwipeLeft()
+                                offsetX.snapTo(0f)
+                                offsetY.snapTo(0f)
+                            } else if (offsetY.value < -200f) {
+                                onSuperLike()
+                                offsetX.snapTo(0f)
+                                offsetY.snapTo(0f)
+                            } else {
+                                offsetX.animateTo(0f, spring())
+                                offsetY.animateTo(0f, spring())
+                            }
+                        }
+                    }
+                )
+            }
+            .graphicsLayer {
+                translationX = offsetX.value
+                translationY = offsetY.value
+                rotationZ = (offsetX.value / 25f).coerceIn(-18f, 18f)
+            }
     ) {
+        // Stack depth illusion back shadow
         Card(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 14.dp)
-                .offset(y = 10.dp),
+                .padding(horizontal = 10.dp)
+                .offset(y = 12.dp),
             shape = RoundedCornerShape(32.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFE5DDD9))
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFDCD6D2).copy(alpha = 0.5f))
         ) {}
 
+        // Main Front Card
         Card(
             modifier = Modifier
                 .fillMaxSize()
-                .shadow(12.dp, RoundedCornerShape(32.dp)),
+                .shadow(16.dp, RoundedCornerShape(32.dp)),
             shape = RoundedCornerShape(32.dp),
-            colors = CardDefaults.cardColors(containerColor = CommunityBadge)
+            colors = CardDefaults.cardColors(containerColor = DeepWine)
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(
-                                    Color(0xFF4A121E),
-                                    CommunityBadge,
-                                    Color(0xFF2B0A12)
-                                )
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = profile.name.uppercase().substringBefore(" "),
-                        color = Color.White.copy(alpha = 0.15f),
-                        fontSize = 64.sp,
-                        fontWeight = FontWeight.Black
-                    )
-                }
-
+                // Background Image
                 AsyncImage(
-                    model = profile.photoUrl,
-                    contentDescription = null,
+                    model = user.photoUrlsJson.ifBlank { "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800" },
+                    contentDescription = user.name,
                     contentScale = ContentScale.Crop,
-                    placeholder = ColorPainter(Color.Transparent),
-                    error = ColorPainter(Color.Transparent),
                     modifier = Modifier.fillMaxSize()
                 )
 
+                // Dark gradient scrim overlay
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(
                             Brush.verticalGradient(
                                 colors = listOf(
+                                    Color.Black.copy(alpha = 0.35f),
                                     Color.Transparent,
-                                    Color.Transparent,
-                                    Color.Black.copy(alpha = 0.85f)
+                                    Color.Black.copy(alpha = 0.88f)
                                 )
                             )
                         )
                 )
 
+                // Live Dynamic Swipe Stamp Badges
+                val rightAlpha = (offsetX.value / 120f).coerceIn(0f, 1f)
+                val leftAlpha = (-offsetX.value / 120f).coerceIn(0f, 1f)
+                val superAlpha = (-offsetY.value / 100f).coerceIn(0f, 1f)
+
+                if (rightAlpha > 0.05f) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(start = 24.dp, top = 80.dp)
+                            .rotate(-18f)
+                            .border(3.dp, EmeraldVerified.copy(alpha = rightAlpha), RoundedCornerShape(12.dp))
+                            .background(EmeraldVerified.copy(alpha = rightAlpha * 0.25f), RoundedCornerShape(12.dp))
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        Text(
+                            text = "CONNECT",
+                            color = Color.White.copy(alpha = rightAlpha),
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 2.sp
+                        )
+                    }
+                }
+
+                if (leftAlpha > 0.05f) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(end = 24.dp, top = 80.dp)
+                            .rotate(18f)
+                            .border(3.dp, Color(0xFFEF4444).copy(alpha = leftAlpha), RoundedCornerShape(12.dp))
+                            .background(Color(0xFFEF4444).copy(alpha = leftAlpha * 0.25f), RoundedCornerShape(12.dp))
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        Text(
+                            text = "PASS",
+                            color = Color.White.copy(alpha = leftAlpha),
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 2.sp
+                        )
+                    }
+                }
+
+                if (superAlpha > 0.05f) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .border(3.dp, SuperLikeBlue.copy(alpha = superAlpha), RoundedCornerShape(14.dp))
+                            .background(SuperLikeBlue.copy(alpha = superAlpha * 0.3f), RoundedCornerShape(14.dp))
+                            .padding(horizontal = 20.dp, vertical = 10.dp)
+                    ) {
+                        Text(
+                            text = "⭐ SUPER PITCH",
+                            color = Color.White.copy(alpha = superAlpha),
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 2.sp
+                        )
+                    }
+                }
+
+                // Top Tag Ribbons (Match %, Verified Builder, Report button)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(20.dp),
+                        .padding(18.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.2f))
+                            .background(EmeraldVerified)
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
                         Text(
-                            text = "â˜… Top Pick",
+                            text = "$matchScore% Match",
                             color = Color.White,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
 
-                    Box(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(Color(0xFF4CAF50))
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Text(
-                            text = "${profile.matchPercent} Skill Match",
-                            color = Color.White,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (user.isVerified) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.25f))
+                                    .padding(horizontal = 10.dp, vertical = 6.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Verified,
+                                        contentDescription = null,
+                                        tint = AmberGold,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Text(
+                                        text = "Verified",
+                                        color = Color.White,
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        }
+
+                        IconButton(
+                            onClick = onReport,
+                            modifier = Modifier
+                                .size(34.dp)
+                                .clip(CircleShape)
+                                .background(Color.Black.copy(alpha = 0.35f))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Flag,
+                                contentDescription = "Report",
+                                tint = Color.White.copy(alpha = 0.8f),
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
                     }
                 }
 
+                // Bottom Profile Summary Section
                 Column(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
                         .fillMaxWidth()
                         .padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.Bottom
                     ) {
-                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Text(
-                                    text = "${profile.name}, ${profile.age}",
+                                    text = "${user.name}, ${user.age}",
                                     fontSize = 26.sp,
                                     fontWeight = FontWeight.ExtraBold,
                                     color = Color.White
@@ -702,14 +874,14 @@ private fun FullPhotoCard(
                                     modifier = Modifier
                                         .size(10.dp)
                                         .clip(CircleShape)
-                                        .background(Color(0xFF4CAF50))
+                                        .background(EmeraldVerified)
                                 )
                             }
 
                             Text(
-                                text = profile.role,
+                                text = user.role,
                                 fontSize = 15.sp,
-                                color = Color.White.copy(alpha = 0.9f),
+                                color = Color.White.copy(alpha = 0.92f),
                                 fontWeight = FontWeight.Medium
                             )
 
@@ -720,13 +892,13 @@ private fun FullPhotoCard(
                                 Icon(
                                     imageVector = Icons.Default.LocationOn,
                                     contentDescription = null,
-                                    tint = Color.White.copy(alpha = 0.7f),
+                                    tint = Color.White.copy(alpha = 0.75f),
                                     modifier = Modifier.size(14.dp)
                                 )
                                 Text(
-                                    text = profile.location,
+                                    text = "${user.location} • ${user.experienceYears}y exp",
                                     fontSize = 12.sp,
-                                    color = Color.White.copy(alpha = 0.7f)
+                                    color = Color.White.copy(alpha = 0.75f)
                                 )
                             }
                         }
@@ -734,7 +906,7 @@ private fun FullPhotoCard(
                         IconButton(
                             onClick = onViewDetails,
                             modifier = Modifier
-                                .size(44.dp)
+                                .size(42.dp)
                                 .clip(CircleShape)
                                 .background(Color.White.copy(alpha = 0.25f))
                         ) {
@@ -746,27 +918,54 @@ private fun FullPhotoCard(
                         }
                     }
 
+                    // Skills Tags Preview
+                    val skills = user.skillsJson.split(",").take(3)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.padding(top = 4.dp)
+                    ) {
+                        skills.forEach { tag ->
+                            Box(
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.2f))
+                                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = tag.trim(),
+                                    color = Color.White,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+                    }
+
+                    // Tap to expand bar
                     Surface(
                         onClick = onViewDetails,
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp),
-                        color = Color.White.copy(alpha = 0.15f)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color.White.copy(alpha = 0.16f)
                     ) {
                         Row(
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "View full profile & bio",
+                                text = "View full bio & stack pitch",
                                 color = Color.White,
-                                fontSize = 13.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
                             Icon(
-                                imageVector = Icons.Default.KeyboardArrowUp,
+                                imageVector = Icons.Default.KeyboardArrowDown,
                                 contentDescription = null,
-                                tint = Color.White
+                                tint = Color.White,
+                                modifier = Modifier.size(16.dp)
                             )
                         }
                     }
@@ -776,108 +975,93 @@ private fun FullPhotoCard(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun FullProfileDetailsContent(
-    profile: PartnerProfile,
-    onClose: () -> Unit
+private fun MatchCelebrationDialog(
+    user: UserEntity,
+    onDismiss: () -> Unit,
+    onSendMessage: () -> Unit,
+    onViewProfile: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp)
-            .padding(bottom = 32.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.82f))
+                .clickable(onClick = onDismiss),
+            contentAlignment = Alignment.Center
         ) {
-            Column {
-                Text(
-                    text = profile.name,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = PrimaryText
-                )
-                Text(
-                    text = profile.role,
-                    fontSize = 14.sp,
-                    color = SecondaryText
-                )
-            }
-            IconButton(
-                onClick = onClose,
+            Card(
                 modifier = Modifier
-                    .clip(CircleShape)
-                    .background(PrimaryBackground)
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .clickable(enabled = false, onClick = {}),
+                shape = RoundedCornerShape(32.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
-                Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Close", tint = PrimaryText)
-            }
-        }
-
-        Divider(color = TagBgLight)
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(TagBgLight)
-                    .padding(vertical = 12.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Skill Fit", fontSize = 11.sp, color = SecondaryText)
-                    Text(profile.matchPercent, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = CommunityBadge)
-                }
-            }
-
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(TagBgLight)
-                    .padding(vertical = 12.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Status", fontSize = 11.sp, color = SecondaryText)
-                    Text(profile.verified, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = PrimaryText)
-                }
-            }
-        }
-
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("About", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = PrimaryText)
-            Text(
-                text = profile.bio,
-                fontSize = 14.sp,
-                color = SecondaryText,
-                lineHeight = 22.sp
-            )
-        }
-
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Skills & Focus Areas", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = PrimaryText)
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                profile.interests.forEach { tag ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(28.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
                     Box(
                         modifier = Modifier
+                            .size(76.dp)
                             .clip(CircleShape)
-                            .background(PrimaryBackground)
-                            .border(1.dp, CardBorderColor, CircleShape)
-                            .padding(horizontal = 14.dp, vertical = 8.dp)
+                            .background(CommunityBadge.copy(alpha = 0.15f)),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(text = tag, fontSize = 13.sp, color = PrimaryText, fontWeight = FontWeight.Medium)
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = "Match",
+                            tint = CommunityBadge,
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
+
+                    Text(
+                        text = "It's a Build Match!",
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Text(
+                        text = "You and ${user.name} both liked each other's vision. Start a conversation to explore shipping together.",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        lineHeight = 20.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Button(
+                        onClick = onSendMessage,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = CommunityBadge,
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text("Send First Pitch", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                    }
+
+                    OutlinedButton(
+                        onClick = onViewProfile,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text("View Profile", fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -885,10 +1069,432 @@ private fun FullProfileDetailsContent(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFFFAF7F2)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun DiscoverScreenPreview() {
-    BriviaClubAppTheme {
-        DiscoverScreen(onNavigateChat = { _, _, _ -> })
+private fun FullProfileBottomSheetContent(
+    user: UserEntity,
+    matchScore: Int,
+    onClose: () -> Unit,
+    onConnect: () -> Unit,
+    onReport: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
+            .padding(bottom = 32.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(18.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = "${user.name}, ${user.age}",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    if (user.isVerified) {
+                        Icon(
+                            imageVector = Icons.Default.Verified,
+                            contentDescription = "Verified",
+                            tint = AmberGold,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+                Text(
+                    text = user.headline.ifBlank { user.role },
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            IconButton(
+                onClick = onClose,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Close")
+            }
+        }
+
+        Divider()
+
+        // Match Fit Stats
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .padding(14.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("Skill Compatibility", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("$matchScore%", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = CommunityBadge)
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .padding(14.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("Experience", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("${user.experienceYears} Years", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                }
+            }
+        }
+
+        // Bio Section
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text("About & Vision", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+            Text(
+                text = user.bio.ifBlank { "Passionate about building scalable products and collaborating with driven co-founders." },
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                lineHeight = 22.sp
+            )
+        }
+
+        // Expertise Chips
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("Skills & Expertise", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                user.skillsJson.split(",").forEach { skill ->
+                    if (skill.isNotBlank()) {
+                        Box(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                                .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                                .padding(horizontal = 14.dp, vertical = 7.dp)
+                        ) {
+                            Text(text = skill.trim(), fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                        }
+                    }
+                }
+            }
+        }
+
+        // Looking For Chips
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("Looking For", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                user.lookingForJson.split(",").forEach { item ->
+                    if (item.isNotBlank()) {
+                        Box(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(ChampagneGold.copy(alpha = 0.15f))
+                                .border(1.dp, ChampagneGold.copy(alpha = 0.5f), CircleShape)
+                                .padding(horizontal = 14.dp, vertical = 7.dp)
+                        ) {
+                            Text(text = "🎯 ${item.trim()}", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+                }
+            }
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            OutlinedButton(
+                onClick = onReport,
+                modifier = Modifier.weight(1f),
+                shape = CircleShape
+            ) {
+                Text("Report Builder")
+            }
+
+            Button(
+                onClick = onConnect,
+                modifier = Modifier.weight(1.5f),
+                shape = CircleShape,
+                colors = ButtonDefaults.buttonColors(containerColor = CommunityBadge)
+            ) {
+                Text("Connect (Like)", fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+private fun FilterBottomSheetContent(
+    currentFilter: com.briviaclub.app.data.local.entity.UserFilterEntity,
+    onApply: (location: String, category: String, distance: Int, minMatch: Int, sortBy: String) -> Unit,
+    onClose: () -> Unit
+) {
+    var selectedLocation by remember { mutableStateOf(currentFilter.locationFilter) }
+    var selectedCategory by remember { mutableStateOf(currentFilter.categoryFilter) }
+    var customLocationText by remember { mutableStateOf("") }
+    var customCategoryText by remember { mutableStateOf("") }
+    var distanceKm by remember { mutableStateOf(currentFilter.maxDistanceKm.toFloat()) }
+    var minMatchPercent by remember { mutableStateOf(currentFilter.minMatchPercent.toFloat()) }
+    var selectedSortBy by remember { mutableStateOf(currentFilter.sortBy) }
+
+    val presetLocations = remember {
+        mutableStateListOf(
+            "All locations", "Bengaluru", "Pune", "Mumbai", "Delhi NCR", "San Francisco", "London", "Tokyo", "Remote"
+        )
+    }
+
+    val presetCategories = remember {
+        mutableStateListOf(
+            "All", "Co-founder", "AI / ML", "Fullstack", "SaaS", "Growth", "UI/UX", "Web3", "Hackathon"
+        )
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
+            .padding(bottom = 36.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Discovery Filters",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            TextButton(
+                onClick = {
+                    selectedLocation = "All locations"
+                    selectedCategory = "All"
+                    distanceKm = 100f
+                    minMatchPercent = 60f
+                    selectedSortBy = "match_percent"
+                }
+            ) {
+                Text("Reset All", color = CommunityBadge, fontWeight = FontWeight.Bold)
+            }
+        }
+
+        // Location Filter with "Other / Custom City" support
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("Location", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                presetLocations.forEach { loc ->
+                    val isSelected = selectedLocation == loc
+                    FilterChip(
+                        selected = isSelected,
+                        onClick = { selectedLocation = loc },
+                        label = { Text(loc, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = CommunityBadge,
+                            selectedLabelColor = Color.White
+                        ),
+                        shape = CircleShape
+                    )
+                }
+            }
+
+            // Custom City input field
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedTextField(
+                    value = customLocationText,
+                    onValueChange = { customLocationText = it },
+                    placeholder = { Text("Add custom city...", fontSize = 12.sp) },
+                    singleLine = true,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                Button(
+                    onClick = {
+                        val text = customLocationText.trim()
+                        if (text.isNotEmpty() && !presetLocations.contains(text)) {
+                            presetLocations.add(text)
+                            selectedLocation = text
+                            customLocationText = ""
+                        }
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = CommunityBadge)
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Add")
+                }
+            }
+        }
+
+        // Category / Focus Filter with "Other / Custom Tag" support
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("Focus / Skills Category", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                presetCategories.forEach { cat ->
+                    val isSelected = selectedCategory == cat
+                    FilterChip(
+                        selected = isSelected,
+                        onClick = { selectedCategory = cat },
+                        label = { Text(cat, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = CommunityBadge,
+                            selectedLabelColor = Color.White
+                        ),
+                        shape = CircleShape
+                    )
+                }
+            }
+
+            // Custom tag creator
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedTextField(
+                    value = customCategoryText,
+                    onValueChange = { customCategoryText = it },
+                    placeholder = { Text("Add custom skill/tag...", fontSize = 12.sp) },
+                    singleLine = true,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                Button(
+                    onClick = {
+                        val text = customCategoryText.trim()
+                        if (text.isNotEmpty() && !presetCategories.contains(text)) {
+                            presetCategories.add(text)
+                            selectedCategory = text
+                            customCategoryText = ""
+                        }
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = CommunityBadge)
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Add")
+                }
+            }
+        }
+
+        // Distance Slider
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Max Distance", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                Text("${distanceKm.roundToInt()} km", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = CommunityBadge)
+            }
+            Slider(
+                value = distanceKm,
+                onValueChange = { distanceKm = it },
+                valueRange = 10f..500f,
+                colors = SliderDefaults.colors(
+                    thumbColor = CommunityBadge,
+                    activeTrackColor = CommunityBadge
+                )
+            )
+        }
+
+        // Min Match % Slider
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Minimum Match %", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                Text("${minMatchPercent.roundToInt()}%", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = EmeraldVerified)
+            }
+            Slider(
+                value = minMatchPercent,
+                onValueChange = { minMatchPercent = it },
+                valueRange = 50f..95f,
+                colors = SliderDefaults.colors(
+                    thumbColor = EmeraldVerified,
+                    activeTrackColor = EmeraldVerified
+                )
+            )
+        }
+
+        // Sort By
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("Sort Decks By", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+            val sorts = listOf(
+                "match_percent" to "Highest Match %",
+                "recent" to "Recently Active",
+                "experience" to "Years of Experience"
+            )
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                sorts.forEach { (key, label) ->
+                    val isSelected = selectedSortBy == key
+                    FilterChip(
+                        selected = isSelected,
+                        onClick = { selectedSortBy = key },
+                        label = { Text(label) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = CommunityBadge,
+                            selectedLabelColor = Color.White
+                        ),
+                        shape = CircleShape
+                    )
+                }
+            }
+        }
+
+        Button(
+            onClick = {
+                onApply(
+                    selectedLocation,
+                    selectedCategory,
+                    distanceKm.roundToInt(),
+                    minMatchPercent.roundToInt(),
+                    selectedSortBy
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(54.dp),
+            shape = CircleShape,
+            colors = ButtonDefaults.buttonColors(containerColor = CommunityBadge)
+        ) {
+            Text("Apply Filters", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        }
     }
 }

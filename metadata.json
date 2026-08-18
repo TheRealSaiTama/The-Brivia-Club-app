@@ -1,0 +1,8 @@
+{
+  "name": "The Brivia Club",
+  "description": "The Brivia Club Android application",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
